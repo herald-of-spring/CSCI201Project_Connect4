@@ -23,7 +23,7 @@ public class Player extends Thread {
 	private Condition turnCond = playerLock.newCondition();
 	
 	public Player(Socket socket, BufferedReader input, PrintWriter output, String username, boolean registered) throws IOException {
-		//customize player and token used
+		//customize player
 		this.socket = socket;
 		this.username = username;
 		this.registered = registered;
@@ -98,10 +98,10 @@ public class Player extends Thread {
 	
 	//returns false when quit/forfeit before taking turn, otherwise true
 	private boolean takeTurn() throws IOException {
-		write("move");
 		String col;
 		Integer valid;
 		do {
+			write("move");
 			col = input.readLine().trim();
 			if (col.equals("quit")) {
 				opponent.relay("quit");
@@ -144,7 +144,7 @@ public class Player extends Thread {
 	public void run() {    //remember to reset inGame, inQueue, inviteFlag to false and opponent, board to null!
 		while (true) {    //or clicks quit
 			try {
-				if (!inviteFlag) {
+				if (!inviteFlag) {    //if invited skip straight to game side (inviter uses assign() to populate invitee's data members)
 					String action = input.readLine().trim();    //main lobby side
 					if (action.equals("play")) {
 						inQueue = true;
@@ -246,9 +246,6 @@ public class Player extends Thread {
 				playerNum = null;
 			}
 			catch (SocketException se) {    //client drops connection
-				if (inviteFlag) {
-					continue;
-				}
 				else {
 					if (inGame) {
 						opponent.write("quit");
@@ -258,6 +255,12 @@ public class Player extends Thread {
 					socket.close();
 					break;
 				}
+			}
+			catch (InterruptedException ie) {    //by receiving invite
+				continue;
+			}
+			catch (IOException io) {    //default catchall return to lobby
+				continue;
 			}
 		}
 	}
