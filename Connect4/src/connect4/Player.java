@@ -22,15 +22,16 @@ public class Player extends Thread {
 	private Lock playerLock = new ReentrantLock();
 	private Condition turnCond = playerLock.newCondition();
 	
-	public Player(Socket socket, String username, boolean registered) throws IOException {
+	public Player(Socket socket, BufferedReader input, PrintWriter output, String username, boolean registered) throws IOException {
 		//customize player and token used
 		this.socket = socket;
 		this.username = username;
 		this.registered = registered;
-		input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		output = new PrintWriter(socket.getOutputStream());    //remember to flush!
+		this.input = input;
+		this.output = output;    //remember to flush!
 		this.inGame = false;
 		this.inQueue = false;
+		inviteFlag = false;
 	}
 	
 	public String getUsername() {
@@ -52,20 +53,20 @@ public class Player extends Thread {
 	}
 	
 	//instantiates board, player priority, and links 2 players together
-	public void assign(Integer playerNum, Board board, Player opponent) {
+	private void assign(Integer playerNum, Board board, Player opponent) {
 		this.board = board;
 		this.playerNum = playerNum;
 		this.opponent = opponent;
 	}
 	
 	//messages Clientmain
-	public void write(String o) throws IOException {
+	private void write(String o) throws IOException {
 		output.write(o);
 		output.flush();
 	}
 	
 	//tells Clientmain to shutdown
-	public void shutdown() throws IOException {
+	private void shutdown() throws IOException {
 		write(null);
 		input.close();
 		output.close();
@@ -73,7 +74,7 @@ public class Player extends Thread {
 	}
 	
 	//only 1 player can invite at a time
-	public synchronized boolean invite(String user) throws IOException {
+	private synchronized boolean invite(String user) throws IOException {
 		if (inGame) {
 			return false;
 		}
@@ -109,18 +110,34 @@ public class Player extends Thread {
 	}
 	
 	//relays message with signaling
-	public void relay(String message) throws IOException {
+	private void relay(String message) throws IOException {
 		playerLock.lock();
 		turnCond.signal();
 		write(message);
 		playerLock.unlock();
 	}
 	
+	//Lobby options: play find quit
+		/*user can give 'back' command anytime to go back to lobby*/
+		//play response: (match [opponentname]) (timeout)
+			//(match [opponentname]) enters game state (see below)
+			//(timeout) returns to lobby
+		//find response: (unregistered) (invalid) (denied) (accepted [opponentname])
+			//(accepted [opponentname]) enters game state
+			//all others return to lobby
+		//quit has no response, just shuts down
+	//Game responses: (move) (win) (lose) ([number])
+	/*user can give 'quit' command anytime to forfeit*/
+		//(move) expects a column number reply
+			//relays the column number to opponent
+		//([number]) is the column the opponent chose as their move
+		//all others return to lobby
+	//If player gets invited: 
 	@Override
 	public void run() {    //remember to reset inGame, inQueue, inviteFlag to false and opponent, board to null!
 		while (true) {    //or clicks quit
 			try {
-				if (inviteFlag) {
+				if (!inviteFlag) {
 					String action = input.readLine().trim();    //main lobby side
 					if (action.equals("play")) {
 						inQueue = true;
@@ -152,12 +169,12 @@ public class Player extends Thread {
 					}
 					else if (action.equals("find")) {
 						if (!registered) {
-							write("invalid");
+							write("unregistered");
 							continue;
 						}
 						do {
 							String user = input.readLine().trim();
-							if (user.equals("back")) {
+							if (user.equals("back")) {    //clicks back to main lobby
 								break;
 							}
 							opponent = Servermain.findPlayer(user);
@@ -170,6 +187,8 @@ public class Player extends Thread {
 							}
 						} while (opponent == null);
 						if (opponent != null) {
+							write("accepted");
+							write(opponent.getUsername());
 							board = new Board(7, 6, 4);
 							playerNum = 1;
 							opponent.assign(2, board, this);
@@ -205,7 +224,7 @@ public class Player extends Thread {
 						}
 					}
 					winner = board.checkWinner();
-					++turnNum;
+					++turnNum;    //player takes turn every other iteration
 				}
 				if (winner == playerNum) {
 					write("win");
@@ -213,7 +232,7 @@ public class Player extends Thread {
 				else {
 					write("lose");
 				}
-				inGame = false;
+				inGame = false;    //reset values
 				inviteFlag = false;
 				opponent = null;
 				board = null;
