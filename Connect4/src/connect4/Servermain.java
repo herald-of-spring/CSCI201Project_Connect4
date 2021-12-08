@@ -1,9 +1,10 @@
-package src.connect4;
+package connect4;
 import java.sql.*;
 import java.util.Random;
 import java.util.concurrent.*;
 import java.net.*;
 import java.io.*;
+import java.util.Map;
 
 
 /* Accesses DB
@@ -91,7 +92,7 @@ public class Servermain {
 			int success = st.executeUpdate();
 			
 			if(success>=1) {
-				Player p = new Player(s,br,pr,user,0);
+				Player p = new Player(s,br,pr,user,false);
 				players.add(p);
 				users.put(user,p);
 				playerCount++;
@@ -110,10 +111,6 @@ public class Servermain {
 			e.printStackTrace();
 			return false;
 		}
-		
-		pr.write("Error creating guest account.");
-		pr.flush();
-		return false;
 	}
 	
 	
@@ -140,7 +137,7 @@ public class Servermain {
 				
 				if(success >= 1) { //update successful
 					//create player, add to list
-					Player p = new Player(s,br,pr,user,1);
+					Player p = new Player(s,br,pr,user,true);
 					//TODO: p.setUser(user) //etc etc
 					players.add(p);
 					users.put(user,p);
@@ -215,7 +212,7 @@ public class Servermain {
 	public static Player randomPlayer(String p1) {
 		
 		
-		for(Map.Entry<String,Player> entry : players.entrySet()) {
+		for(Map.Entry<String,Player> entry : users.entrySet()) {
 			if((entry.getKey()).equals(p1) || !entry.getValue().isWaiting()) {
 				return null;
 			}
