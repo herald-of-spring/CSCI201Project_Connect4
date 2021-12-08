@@ -1,4 +1,4 @@
-package connect4;
+package src.connect4;
 import java.sql.*;
 import java.util.Random;
 import java.util.concurrent.*;
@@ -38,15 +38,6 @@ public class Servermain {
 	
 	//where we store boards, call player function assign & pass board to there
 	
-	public Servermain() {
-		try {
-			
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-			
-		}
-	}
 	
 	/* Creates the server socket that waits 
 	 * for clientmain to connect & send player info.
@@ -54,7 +45,7 @@ public class Servermain {
 	public static void main(String[] args) {
 		try{
 			players = new CopyOnWriteArrayList<Player>();
-			users = new ConcurrentHashMap<String,String>();
+			users = new ConcurrentHashMap<String,Player>();
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			conn = DriverManager.getConnection(dbUrl,dbUser,pwd);
 			ss = new ServerSocket(10000);
@@ -104,6 +95,14 @@ public class Servermain {
 				players.add(p);
 				users.put(user,p);
 				playerCount++;
+				pr.write("Guest created successfully!");
+				pr.flush();
+				return true;
+			}
+			else {
+				pr.write("Error creating guest account.");
+				pr.flush();
+				return false;
 			}
 			
 		}
@@ -112,12 +111,13 @@ public class Servermain {
 			return false;
 		}
 		
-		
+		pr.write("Error creating guest account.");
+		pr.flush();
 		return false;
 	}
 	
 	
-	/* [INCOMPLETE] Create player object & add to database & player list.
+	/* [COMPLETE] Create player object & add to database & player list.
 	 * Increment player count.
 	 * Verify that username is unique. If not, return false.
 	 * If DB error, return false.
@@ -139,22 +139,21 @@ public class Servermain {
 				int success = st.executeUpdate();
 				
 				if(success >= 1) { //update successful
-					BufferedReader br = new BufferedReader(new InputStreamReader(istream));
-					PrintWriter pr = new PrintWriter(ostream);
 					//create player, add to list
 					Player p = new Player(s,br,pr,user,1);
 					//TODO: p.setUser(user) //etc etc
 					players.add(p);
 					users.put(user,p);
 					playerCount++;
-					ostream.write(("Registered successfully!").getBytes());
-					ostream.flush();
+					pr.write(("Registered successfully!"));
+					pr.flush();
 					return true;
 				}
 			}
-			
 			else {
-				
+				pr.write("Error registering new user.");
+				pr.flush();
+				return false;
 			}
 			
 			
@@ -215,13 +214,18 @@ public class Servermain {
 	 */
 	public static Player randomPlayer(String p1) {
 		
-		Random rand = new Random(36);
-		int r_index = (rand.nextInt(Integer.MAX_VALUE)) % playerCount;
-		Player playerTwo = players.get(r_index);
 		
-		if(playerTwo!=null && playerTwo.isWaiting()) {
-			return playerTwo;
+		for(Map.Entry<String,Player> entry : players.entrySet()) {
+			if((entry.getKey()).equals(p1) || !entry.getValue().isWaiting()) {
+				return null;
+			}
+			else {
+				return entry.getValue();
+			}
+			
 		}
+		
+		
 		
 		return null;
 	}
