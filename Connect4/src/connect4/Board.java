@@ -1,10 +1,13 @@
 package connect4;
+import java.io.Serializable;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Board {
+public class Board implements Serializable {
+	
+	private static final long serialVersionUID = 383927069613799417L;
 	
 	private CopyOnWriteArrayList<CopyOnWriteArrayList<Integer>> board; 
 	private Lock lock = new ReentrantLock(); 

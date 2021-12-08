@@ -213,7 +213,7 @@ public class Player extends Thread {
 				else {
 					write("lose");
 				}
-				inGame = false;
+				inGame = false;    //reset values
 				inviteFlag = false;
 				opponent = null;
 				board = null;
