@@ -85,6 +85,10 @@ public class Player extends Thread {
 			inviteFlag = true;
 			return true;
 		}
+		else if (response == "quit") {
+			shutdown();
+			return false;
+		}
 		return false;
 	}
 	
@@ -132,7 +136,10 @@ public class Player extends Thread {
 			//relays the column number to opponent
 		//([number]) is the column the opponent chose as their move
 		//all others return to lobby
-	//If player gets invited: 
+	//If player gets invited via (invite [name]) command: expects accept reply
+	/*user can give 'quit' command anytime to exit program*/
+		//any other reply is assumed denial
+	
 	@Override
 	public void run() {    //remember to reset inGame, inQueue, inviteFlag to false and opponent, board to null!
 		while (true) {    //or clicks quit
