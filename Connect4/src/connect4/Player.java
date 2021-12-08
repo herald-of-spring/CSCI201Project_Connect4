@@ -31,6 +31,7 @@ public class Player extends Thread {
 		this.output = output;    //remember to flush!
 		this.inGame = false;
 		this.inQueue = false;
+		inviteFlag = false;
 	}
 	
 	public String getUsername() {
@@ -116,11 +117,27 @@ public class Player extends Thread {
 		playerLock.unlock();
 	}
 	
+	//Lobby options: play find quit
+		/*user can give 'back' command anytime to go back to lobby*/
+		//play response: (match [opponentname]) (timeout)
+			//(match [opponentname]) enters game state (see below)
+			//(timeout) returns to lobby
+		//find response: (unregistered) (invalid) (denied) (accepted [opponentname])
+			//(accepted [opponentname]) enters game state
+			//all others return to lobby
+		//quit has no response, just shuts down
+	//Game responses: (move) (win) (lose) ([number])
+	/*user can give 'quit' command anytime to forfeit*/
+		//(move) expects a column number reply
+			//relays the column number to opponent
+		//([number]) is the column the opponent chose as their move
+		//all others return to lobby
+	//If player gets invited: 
 	@Override
 	public void run() {    //remember to reset inGame, inQueue, inviteFlag to false and opponent, board to null!
 		while (true) {    //or clicks quit
 			try {
-				if (inviteFlag) {
+				if (!inviteFlag) {
 					String action = input.readLine().trim();    //main lobby side
 					if (action.equals("play")) {
 						inQueue = true;
@@ -152,12 +169,12 @@ public class Player extends Thread {
 					}
 					else if (action.equals("find")) {
 						if (!registered) {
-							write("invalid");
+							write("unregistered");
 							continue;
 						}
 						do {
 							String user = input.readLine().trim();
-							if (user.equals("back")) {
+							if (user.equals("back")) {    //clicks back to main lobby
 								break;
 							}
 							opponent = Servermain.findPlayer(user);
@@ -170,6 +187,8 @@ public class Player extends Thread {
 							}
 						} while (opponent == null);
 						if (opponent != null) {
+							write("accepted");
+							write(opponent.getUsername());
 							board = new Board(7, 6, 4);
 							playerNum = 1;
 							opponent.assign(2, board, this);
