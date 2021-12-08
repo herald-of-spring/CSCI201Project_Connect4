@@ -5,6 +5,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+//serializing to represent in front end
 public class Board implements Serializable {
 	
 	private static final long serialVersionUID = 383927069613799417L;

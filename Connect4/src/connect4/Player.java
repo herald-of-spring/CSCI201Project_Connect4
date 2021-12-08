@@ -205,7 +205,7 @@ public class Player extends Thread {
 						}
 					}
 					winner = board.checkWinner();
-					++turnNum;
+					++turnNum;    //player takes turn every other iteration
 				}
 				if (winner == playerNum) {
 					write("win");
