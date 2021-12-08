@@ -22,13 +22,13 @@ public class Player extends Thread {
 	private Lock playerLock = new ReentrantLock();
 	private Condition turnCond = playerLock.newCondition();
 	
-	public Player(Socket socket, String username, boolean registered) throws IOException {
+	public Player(Socket socket, BufferedReader input, PrintWriter output, String username, boolean registered) throws IOException {
 		//customize player and token used
 		this.socket = socket;
 		this.username = username;
 		this.registered = registered;
-		input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		output = new PrintWriter(socket.getOutputStream());    //remember to flush!
+		this.input = input;
+		this.output = output;    //remember to flush!
 		this.inGame = false;
 		this.inQueue = false;
 	}
@@ -52,20 +52,20 @@ public class Player extends Thread {
 	}
 	
 	//instantiates board, player priority, and links 2 players together
-	public void assign(Integer playerNum, Board board, Player opponent) {
+	private void assign(Integer playerNum, Board board, Player opponent) {
 		this.board = board;
 		this.playerNum = playerNum;
 		this.opponent = opponent;
 	}
 	
 	//messages Clientmain
-	public void write(String o) throws IOException {
+	private void write(String o) throws IOException {
 		output.write(o);
 		output.flush();
 	}
 	
 	//tells Clientmain to shutdown
-	public void shutdown() throws IOException {
+	private void shutdown() throws IOException {
 		write(null);
 		input.close();
 		output.close();
@@ -73,7 +73,7 @@ public class Player extends Thread {
 	}
 	
 	//only 1 player can invite at a time
-	public synchronized boolean invite(String user) throws IOException {
+	private synchronized boolean invite(String user) throws IOException {
 		if (inGame) {
 			return false;
 		}
@@ -109,7 +109,7 @@ public class Player extends Thread {
 	}
 	
 	//relays message with signaling
-	public void relay(String message) throws IOException {
+	private void relay(String message) throws IOException {
 		playerLock.lock();
 		turnCond.signal();
 		write(message);
