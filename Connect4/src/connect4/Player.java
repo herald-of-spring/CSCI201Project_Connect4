@@ -17,12 +17,12 @@ public class Player extends Thread {
 	
 	private Socket socket;
 	private BufferedReader input;
-	private ObjectOutputStream output;
+	private PrintWriter output;
 	
 	private Lock playerLock = new ReentrantLock();
 	private Condition turnCond = playerLock.newCondition();
 	
-	public Player(Socket socket, BufferedReader input, ObjectOutputStream output, String username, boolean registered) throws IOException {
+	public Player(Socket socket, BufferedReader input, PrintWriter output, String username, boolean registered) throws IOException {
 		//customize player
 		this.socket = socket;
 		this.username = username;
@@ -60,7 +60,7 @@ public class Player extends Thread {
 	}
 	
 	//messages Clientmain
-	private void write(Object o) throws IOException {
+	private void write(String o) throws IOException {
 		output.write(o);
 		output.flush();
 	}
@@ -110,12 +110,11 @@ public class Player extends Thread {
 			valid = insert(Integer.parseInt(col));
 		} while (valid == 0);
 		opponent.relay(col);
-		opponent.write(board);
 		return true;
 	}
 	
 	//relays message with signaling
-	private void relay(Object message) throws IOException {
+	private void relay(String message) throws IOException {
 		playerLock.lock();
 		turnCond.signal();
 		write(message);
