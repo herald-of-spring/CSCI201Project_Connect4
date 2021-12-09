@@ -88,27 +88,34 @@ public class Clientmain {
 					break;
 				case "find":
 					System.out.println("Please enter the username of the opponent you are searching for.");
+					System.out.println("Otherwise, you can do \"back\" to go back to the lobby.");
 					input = scanner.nextLine();
 					isQuit(input);
-					opponent = input;
-					socketOutput.println(input);
-					response = socketInput.readLine();
-					switch (response) {
-						case "unregistered":
-							System.out.println("You need to be registered to search for opponents.");
-							contactPlayer();
-							break;
-						case "denied":
-							System.out.println("Play request denied.");
-							contactPlayer();
-							break;
-						case "invalid":
-							System.out.println("Invalid opponent.");
-							contactPlayer();
-							break;
-						case "accepted":
-							System.out.println("Play request accepted by your opponent: " + opponent);
-							break;
+					switch(input) {
+					case "back":
+						break;
+					default:
+						socketOutput.println(input);
+						response = socketInput.readLine();
+						switch (response) {
+							case "unregistered":
+								System.out.println("You need to be registered to search for opponents.");
+								contactPlayer();
+								break;
+							case "denied":
+								System.out.println("Play request denied.");
+								contactPlayer();
+								break;
+							case "invalid":
+								System.out.println("Invalid opponent.");
+								contactPlayer();
+								break;
+							case "accepted":
+								opponent = input;
+								System.out.println("Play request accepted by your opponent: " + opponent);
+								break;
+						}
+						break;
 					}
 					break;
 				default:
@@ -198,7 +205,12 @@ public class Clientmain {
 	}
 	public void startGame() {
 		Board board = new Board(7,6,4);
+		System.out.println("Game started");
+		displayBoard();
 		
+	}
+	public void displayBoard() {
+		//
 	}
 	public static void main(String [] args) {
 		Clientmain solution = null;
