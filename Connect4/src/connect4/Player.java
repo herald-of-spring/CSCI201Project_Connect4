@@ -155,6 +155,7 @@ public class Player extends Thread {
 	
 	@Override
 	public void run() {    //remember to reset inGame, inQueue, inviteFlag to false and opponent, board to null!
+		System.out.println("player running!");
 		while (true) {    //or clicks quit
 			if (quitFlag == true) {    //only for quitting directly from find
 				break;
@@ -162,9 +163,12 @@ public class Player extends Thread {
 			try {
 				if (!inviteFlag) {    //if invited skip straight to game side (inviter uses assign() to populate invitee's data members)
 					String action = Servermain.readInput(input);    //main lobby side
+					System.out.println("Action  ="+action);
 					if (action.equals("play")) {
+						System.out.println("playing-1");
 						inQueue = true;
 						for (int i=0; i<30; ++i) {    //30 second timer
+							System.out.println("playing");
 							opponent = Servermain.randomPlayer(username);
 							if (opponent == null) {
 								try {

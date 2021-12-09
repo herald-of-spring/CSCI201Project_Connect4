@@ -11,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 
+
 /* Accesses DB
  * Holds list of player objects
  */
@@ -31,6 +32,8 @@ public class Servermain {
 	
 	private static PreparedStatement st;
 	
+	private static ExecutorService es;
+	
 	//where we store boards, call player function assign & pass board to there
 	
 	
@@ -39,6 +42,7 @@ public class Servermain {
 	 */
 	public static void main(String[] args) {
 		try{
+		
 			players = new CopyOnWriteArrayList<Player>();
 			users = new ConcurrentHashMap<String,Player>();
 			Class.forName("com.mysql.cj.jdbc.Driver");
@@ -55,12 +59,13 @@ public class Servermain {
 				BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
 				PrintWriter pr = new PrintWriter(s.getOutputStream());
 				
-				String action = br.readLine().trim();
+				String action = readInput(br);
 				
 				boolean b;
 				
+				
 				if(action.equals("login")) {
-					b = logPlayer(br,pr);
+					b = logPlayer(br,pr,s);
 				}
 				else if(action.equals("register")) {
 					b = createPlayer(br,pr,s);
@@ -100,27 +105,28 @@ public class Servermain {
 				user = "Guest#" + Integer.toString(rng.nextInt(Integer.MAX_VALUE)%10000);
 			}
 			
-			st = conn.prepareStatement("INSERT INTO c4players VALUES(?,null,0,0,0,0)");
+			st = conn.prepareStatement("INSERT INTO c4players VALUES(0,?,null,0)");
 			st.setString(1, user);
 			int success = st.executeUpdate();
 			
 			if(success>=1) {
-				Player p = new Player(s,br,pr,user,false);
-				players.add(p);
-				users.put(user,p);
-				pr.write("success");
+				Thread p = new Player(s,br,pr,user,false);
+				p.start();
+				players.add((Player)p);
+				users.put(user,(Player)p);
+				pr.println("success");
 				pr.flush();
 				return true;
 			}
 			else {
-				pr.write("error");
+				pr.println("error");
 				pr.flush();
 				return false;
 			}
 			
 		}
 		catch(Exception e) {
-			pr.write("error");
+			pr.println("error");
 			pr.flush();
 			e.printStackTrace();
 			return false;
@@ -136,29 +142,32 @@ public class Servermain {
 	public static boolean createPlayer(BufferedReader br, PrintWriter pr, Socket s) {
 		try {
 			//check for username in DB
-			String user = br.readLine().trim();
-			String pass = hashPasscode(br.readLine().trim());
+			String user = readInput(br);
+			
+			String pass = hashPasscode(readInput(br));
 			
 			if(!users.containsKey(user) && user.length()<=50 && pass.length()<=64) { 
 				//if DB does not contain username & user/pass is valid, add to DB 
-				st = conn.prepareStatement("INSERT INTO c4players VALUES(?,?,0,0,0,1");
+				st = conn.prepareStatement("INSERT INTO c4players VALUES(0,?,?,1);");
 				st.setString(1, user);
 				st.setString(2, pass);
 				int success = st.executeUpdate();
 				
 				if(success >= 1) { //update successful
 					//create player, add to list
-					Player p = new Player(s,br,pr,user,true);
+					Thread p = new Player(s,br,pr,user,true);
+					p.start();
+					
 					//TODO: p.setUser(user) //etc etc
-					players.add(p);
-					users.put(user,p);
-					pr.write(("success"));
+					players.add((Player)p);
+					users.put(user,(Player)p);
+					pr.println(("success"));
 					pr.flush();
 					return true;
 				}
 			}
 			else {
-				pr.write("error");
+				pr.println("error");
 				pr.flush();
 				return false;
 			}
@@ -180,9 +189,16 @@ public class Servermain {
 			
 			
 		}
-
+		catch(SQLException e) {
+			if(e.getSQLState().startsWith("23")) {
+				pr.println("error");
+				pr.flush();
+				e.printStackTrace();
+				return false;
+			}
+		}
 		catch(Exception e) {
-			pr.write("error");
+			pr.println("error");
 			e.printStackTrace();
 			return false;
 		}
@@ -193,15 +209,19 @@ public class Servermain {
 	
 	public static String readInput(BufferedReader br) {
 		String input = "";
+		//System.out.println(br.toString());
 		try {
 			while(true) {
+				//System.out.println("Eeee");
 				input = br.readLine().trim();
 				if(!input.isEmpty()) {
+					//System.out.println("read!");
 					return input;
 				}
 			}
 		}
 		catch(Exception e) {
+			System.out.println("read exception");
 			e.printStackTrace();
 			return null;
 		}	
@@ -214,28 +234,16 @@ public class Servermain {
 	 * If match, write "success" to client.
 	 * If not, write "error" to client.
 	 */
-	public static boolean logPlayer(BufferedReader br, PrintWriter pr) {
+	public static boolean logPlayer(BufferedReader br, PrintWriter pr, Socket s) {
 		
 		try{
 			System.out.println("login ran");
 			
 			String user ="";
 			String pass = "";
-			while(true) {
-				user = br.readLine().trim();
-				if(!user.isEmpty()) {
-					System.out.println(user +" received");
-					break;
-				}
-			}
+			user = readInput(br);
 			
-			while(true) {
-				pass = br.readLine().trim();
-				if(!pass.isEmpty()) {
-					System.out.println(pass +" received");
-					break;
-				}
-			}
+			pass = readInput(br);
 			
 			
 			st = conn.prepareStatement("SELECT username,password FROM c4players WHERE username = ?");
@@ -248,7 +256,10 @@ public class Servermain {
 				String resultPass = results.getString("password");
 				
 				if(hashPass.equals(resultPass)) {
-					pr.write("success");
+					Player p = new Player(s,br,pr,user,true);
+					System.out.println(p.getUsername());
+					p.start();
+					pr.println("success");
 					pr.flush();
 					return true;
 				}
@@ -258,13 +269,18 @@ public class Servermain {
 		catch(Exception e) {
 			System.out.println("login exception!");
 			e.printStackTrace();
-			pr.write("error");
+			pr.println("error");
 			pr.flush();
 			return false;
 		}
 		System.out.println("login errorrr!");
-		pr.write("error");
+		System.out.println(pr.checkError());
+		System.out.println(pr.toString());
+		
+		
+		pr.println("error");
 		pr.flush();
+		System.out.println("error printed");
 		return false;
 	}
 	

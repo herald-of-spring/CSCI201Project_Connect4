@@ -46,18 +46,18 @@ public class Clientmain {
 		try {
 			switch(input) {
 				case "play":
-					response = socketInput.readLine();
+					response = Servermain.readInput(socketInput);
 					switch (response) {
 						case "timeout":
 							System.out.println("Timeout error. Please try again.");
 							contactPlayer();
 							break;
 						case "match":
-							opponent = socketInput.readLine();
+							opponent = Servermain.readInput(socketInput);
 							System.out.println("Match found with opponent: " + opponent);
 							break;
 						case "invite":
-							opponent = socketInput.readLine();
+							opponent = Servermain.readInput(socketInput);
 							System.out.println("Invite received from: " + opponent);
 							System.out.println("\"accept\" to accept or \"deny\" to deny.");
 							input = scanner.nextLine().toLowerCase();
@@ -81,7 +81,7 @@ public class Clientmain {
 						break;
 					default:
 						socketOutput.println(input);
-						response = socketInput.readLine();
+						response = Servermain.readInput(socketInput);
 						switch (response) {
 							case "unregistered":
 								System.out.println("You need to be registered to search for opponents.");
@@ -151,18 +151,20 @@ public class Clientmain {
 						input = scanner.nextLine();
 						isQuit(input);
 						socketOutput.println(input);
-						response = socketInput.readLine();
-						if (response.equals("error")) {
-							System.out.println("Username already in use or database error."
-									+ "\nPlease try again.");
-						}
-					} while(response.equals("error"));
-					do {
 						System.out.println("Please enter your password");
 						input = scanner.nextLine();
 						isQuit(input);
 						socketOutput.println(input);
-						response = socketInput.readLine();
+						//System.out.println(socketInput.toString());
+						response = Servermain.readInput(socketInput);
+						//System.out.println(response);
+//						while(true) {
+//							response = socketInput.readLine().trim();
+//							if(!response.isEmpty()) {
+//								break;
+//							}
+//						}
+						
 						if (response.equals("error")) {
 							System.out.println("Database error. Please try again");
 						}
@@ -199,7 +201,7 @@ public class Clientmain {
 	}
 	public boolean gameLoop(Board b) throws IOException {
 		Board board = b;
-		String response = socketInput.readLine();
+		String response = Servermain.readInput(socketInput);
 		switch (response) {
 			case "move":
 				board.print();
