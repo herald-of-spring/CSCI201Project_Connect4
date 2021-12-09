@@ -16,6 +16,7 @@ public class Clientmain {
 	private BufferedReader socketInput = null;
 	private PrintWriter socketOutput = null;
 	private String opponent = null;
+	private int lastMove = 0;
 	
 	/* 
 	 * ClientMain constructor accepts no values. It initializes a Scanner to read user input and establishes a connection to the
@@ -183,24 +184,53 @@ public class Clientmain {
 		Board board = new Board(7,6,4);
 		System.out.println("Game started");
 		board.print();
-		while (true) {
-			String response = socketInput.readLine();
-			switch (response) {
-				case "move":
-					queryMove();
-			}
+		boolean over = false;
+		while (!over) {
+			over = gameLoop(board);
+		}
+	}
+	public boolean gameLoop(Board b) throws IOException {
+		Board board = b;
+		String response = socketInput.readLine();
+		switch (response) {
+			case "move":
+				board.print();
+				queryMove();
+				return false;
+			case "success": // you made a valid move
+				System.out.println("Valid column picked!");
+				board.add(1, lastMove);
+				board.print();
+				return false;
+			case "forfeit":
+				System.out.println("Your opponent forfeited the game");
+				return false;
+			case "win":
+				System.out.println("You won!");
+				board.print();
+				return true;
+			case "lose":
+				System.out.println("Game over!");
+				board.print();
+				return true;
+			default: // opponent made a move with column col
+				int col = Integer.parseInt(response);
+				System.out.println("Your opponent picked column " + col);
+				board.add(2, col);
+				board.print();
+				return false;
 		}
 	}
 	public void queryMove() throws IOException {
 		String input = "";
 		int col = 0; // no column picked
 		while (col < 1 && col > 7) {
-		    System.out.println("Pick your move by typing a column from 1 to 7.");
+		    System.out.println("Pick your move by typing a valid column from 1 to 7.");
 		    System.out.println("To forfeit, type \"forfeit\".");
 		    input = scanner.nextLine().toLowerCase();
 		    isQuit(input);
 		    if (input.equals("forfeit")); {
-		    	System.out.println("Game over!");
+		    	// System.out.println("Game over!");
 		    	socketOutput.println("forfeit");
 		    }
 		    try {
@@ -213,6 +243,7 @@ public class Clientmain {
 		    	System.out.println("Error: Your input must range from 1 to 7.");
 		    }
 		}
+		lastMove = col;
 		socketOutput.println(input);
 	}
 	public static void main(String [] args) {
