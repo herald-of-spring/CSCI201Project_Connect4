@@ -2,7 +2,6 @@ package connect4;
 
 import java.io.*;
 import java.net.*;
-import java.util.concurrent.*;
 import java.util.concurrent.locks.*;
 
 public class Player extends Thread {
@@ -80,14 +79,17 @@ public class Player extends Thread {
 		if (inGame) {
 			return false;
 		}
+		else if (inQueue) {
+			inQueue = false;
+		}
 		write("invite");
 		write(user);
 		String response = input.readLine().trim();
-		if (response == "accept") {
+		if (response.equals("accept")) {
 			inviteFlag = true;
 			return true;
 		}
-		else if (response == "quit") {
+		else if (response.equals("quit")) {
 			shutdown();
 			quitFlag = true;
 			return false;
@@ -265,7 +267,7 @@ public class Player extends Thread {
 				playerNum = null;
 			}
 			catch (SocketException se) {    //client drops connection
-				else {
+				try {
 					if (inGame) {
 						opponent.write("quit");
 					}
@@ -274,9 +276,9 @@ public class Player extends Thread {
 					socket.close();
 					break;
 				}
-			}
-			catch (InterruptedException ie) {    //by receiving invite
-				continue;
+				catch (IOException io) {
+					continue;
+				}
 			}
 			catch (IOException io) {    //default catchall return to lobby
 				continue;
