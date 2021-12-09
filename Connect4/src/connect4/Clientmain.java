@@ -35,31 +35,7 @@ public class Clientmain {
 		String password = scanner.nextLine();
 		// Log in to server
 	}
-		
-	/*
-	 * Prints if the player is busy or pulls the chosen column from the Scanner (will be front end in the future) and sends it to ServerMain.
-	 * If the column input is not an integer, then method is executed again recursively.
-	 */
-	/*public void contactPlayer(String action) {
-		try {
-			oos.writeObject("isPlaying");
-			if ((Boolean) ois.readObject()) {
-				System.out.println("Which column do you pick?");
-				int column = Integer.parseInt(scanner.nextLine());
-				oos.writeObject(Integer.valueOf(column));
-			}
-			else {
-				System.out.println("Player is busy.");
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (NumberFormatException e) {
 
-		}
-	}*/
-	
 	/*
 	 * 
 	 */
@@ -203,14 +179,41 @@ public class Clientmain {
 			System.exit(0);
 		}
 	}
-	public void startGame() {
+	public void startGame() throws IOException {
 		Board board = new Board(7,6,4);
 		System.out.println("Game started");
-		displayBoard();
-		
+		board.print();
+		while (true) {
+			String response = socketInput.readLine();
+			switch (response) {
+				case "move":
+					queryMove();
+			}
+		}
 	}
-	public void displayBoard() {
-		//
+	public void queryMove() throws IOException {
+		String input = "";
+		int col = 0; // no column picked
+		while (col < 1 && col > 7) {
+		    System.out.println("Pick your move by typing a column from 1 to 7.");
+		    System.out.println("To forfeit, type \"forfeit\".");
+		    input = scanner.nextLine().toLowerCase();
+		    isQuit(input);
+		    if (input.equals("forfeit")); {
+		    	System.out.println("Game over!");
+		    	socketOutput.println("forfeit");
+		    }
+		    try {
+		        col = Integer.parseInt(input);
+		    } catch (NumberFormatException e) {
+		    	System.out.println("Error: Not a game command or invalid column.");
+		        queryMove();
+		    }
+		    if (col < 1 && col > 7) {
+		    	System.out.println("Error: Your input must range from 1 to 7.");
+		    }
+		}
+		socketOutput.println(input);
 	}
 	public static void main(String [] args) {
 		Clientmain solution = null;
