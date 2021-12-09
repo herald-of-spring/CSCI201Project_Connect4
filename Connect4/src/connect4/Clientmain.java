@@ -30,11 +30,6 @@ public class Clientmain {
 		socket = new Socket(addr, port);
 		socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		socketOutput = new PrintWriter(socket.getOutputStream(), true);
-		System.out.println("What is your username");
-		String username = scanner.nextLine();
-		System.out.println("What is your password");
-		String password = scanner.nextLine();
-		// Log in to server
 	}
 
 	/*
@@ -60,6 +55,19 @@ public class Clientmain {
 						case "match":
 							opponent = socketInput.readLine();
 							System.out.println("Match found with opponent: " + opponent);
+							break;
+						case "invite":
+							opponent = socketInput.readLine();
+							System.out.println("Invite received from: " + opponent);
+							System.out.println("\"accept\" to accept or \"deny\" to deny.");
+							input = scanner.nextLine().toLowerCase();
+							isQuit(input);
+							if (input.equals("accept")) {
+								socketOutput.println("accept");
+							}
+							else {
+								contactPlayer(); // any other response means denial and goes back to lobby
+							}
 							break;
 					}
 					break;
