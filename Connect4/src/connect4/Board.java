@@ -1,15 +1,10 @@
 package connect4;
-import java.io.Serializable;
-import java.util.Scanner;
+//import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.*;
 
-//serializing to represent in front end
-public class Board implements Serializable {
-	
-	private static final long serialVersionUID = 383927069613799417L;
-	
+public class Board {
+		
 	private CopyOnWriteArrayList<CopyOnWriteArrayList<Integer>> board; 
 	private Lock lock = new ReentrantLock(); 
 	
@@ -199,7 +194,17 @@ public class Board implements Serializable {
 	public void print() {
 		for(int i = 0; i < height; i++) {
 			for(int j = 0; j < width; j++) {
-				System.out.print(board.get(i).get(j)); 
+				Integer token = board.get(i).get(j);
+				if (token == 0) {
+					System.out.print(" ");
+				}
+				else if (token == 1) {
+					System.out.print("X");
+				}
+				else if (token == 2) {
+					System.out.print("O");
+				}
+				System.out.print(" "); 
 			}
 			System.out.println(); 
 		}
@@ -208,7 +213,7 @@ public class Board implements Serializable {
 	/*
 	 * Main function for checking functionality
 	 * */
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		
 		Scanner sc = new Scanner(System.in); 
 		Board board = new Board(7,6,4); 
@@ -238,5 +243,5 @@ public class Board implements Serializable {
 		}
 		
 		sc.close(); 
-	}
+	}*/
 }
