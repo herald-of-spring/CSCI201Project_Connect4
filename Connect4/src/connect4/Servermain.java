@@ -68,6 +68,11 @@ public class Servermain {
 				else if(action.equals("guest")) {
 					b = createGuest(br,pr,s);
 				}
+				else if(action.equals("quit")) {
+					br.close();
+					pr.close();
+					s.close();
+				}
 				
 			}
 			
