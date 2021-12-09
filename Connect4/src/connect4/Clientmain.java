@@ -13,8 +13,8 @@ public class Clientmain {
 	private static final int port = 10000;
 	private Scanner scanner = null;
 	private Socket socket = null;
-	private ObjectInputStream ois = null;
-	private ObjectOutputStream oos = null;
+	private BufferedReader socketInput = null;
+	private PrintWriter socketOutput = null;
 	
 	/* 
 	 * ClientMain constructor accepts no values. It initializes a Scanner to read user input and establishes a connection to the
@@ -26,8 +26,8 @@ public class Clientmain {
 	public Clientmain() throws IOException {
 		scanner = new Scanner(System.in);
 		socket = new Socket(addr, port);
-		ois = new ObjectInputStream(socket.getInputStream());
-		oos = new ObjectOutputStream(socket.getOutputStream());
+		socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		socketOutput = new PrintWriter(socket.getOutputStream(), true);
 		System.out.println("What is your username");
 		String username = scanner.nextLine();
 		System.out.println("What is your password");
@@ -39,7 +39,7 @@ public class Clientmain {
 	 * Prints if the player is busy or pulls the chosen column from the Scanner (will be front end in the future) and sends it to ServerMain.
 	 * If the column input is not an integer, then method is executed again recursively.
 	 */
-	public void contactPlayer() {
+	/*public void contactPlayer(String action) {
 		try {
 			oos.writeObject("isPlaying");
 			if ((Boolean) ois.readObject()) {
@@ -55,9 +55,39 @@ public class Clientmain {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} catch (NumberFormatException e) {
-			System.out.println("Column must be a number");
-			contactPlayer();
+
 		}
+	}*/
+	
+	/*
+	 * 
+	 */
+	public String contactPlayer(String action ) {
+		socketOutput.println(action);
+		String response;
+		try {
+			if (action.equals("play")) {
+				response = socketInput.readLine();
+				if (response.equals("timeout")) {
+					return "timeout";
+				}
+				else if (response.equals("match")) {
+					return socketInput.readLine(); // opponent name
+				}
+			}
+			else if (action.equals("find")) {
+				response = socketInput.readLine();
+				if (response.equals("unregistered")) {
+					return "unregistered";
+				}
+			}
+			else if (action.equals("quit")) {
+				// quit
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	/*
@@ -71,11 +101,11 @@ public class Clientmain {
 			if (socket != null) {
 				socket.close();
 			}
-			if (ois != null) {
-				ois.close();
+			if (socketInput != null) {
+				socketInput.close();
 			}
-			if (oos != null) {
-				oos.close();
+			if (socketOutput != null) {
+				socketOutput.close();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
