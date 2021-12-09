@@ -117,6 +117,7 @@ public class Player extends Thread {
 			}
 			valid = insert(Integer.parseInt(col));
 		} while (valid == 0);
+		write("success");
 		opponent.relay(col);
 		return true;
 	}
