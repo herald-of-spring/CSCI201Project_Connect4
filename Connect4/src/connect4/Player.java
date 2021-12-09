@@ -68,7 +68,6 @@ public class Player extends Thread {
 	
 	//tells Clientmain to shutdown
 	private void shutdown() throws IOException {
-		write(null);
 		input.close();
 		output.close();
 		socket.close();
@@ -271,9 +270,7 @@ public class Player extends Thread {
 					if (inGame) {
 						opponent.write("quit");
 					}
-					input.close();
-					output.close();
-					socket.close();
+					shutdown();
 					break;
 				}
 				catch (IOException io) {
