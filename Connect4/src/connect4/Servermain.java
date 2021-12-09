@@ -22,8 +22,8 @@ public class Servermain {
 	private static ConcurrentHashMap<String,Player> users;
 	
 	private static String dbUrl = "jdbc:mysql://localhost:3306/connectfour";
-	private static String dbUser = "INSERT_YOUR_USER";
-	private static String pwd = "INSERT_YOUR_PASS";
+	private static String dbUser = "root";
+	private static String pwd = "calculatingheroine1186";
 	
 	private static ServerSocket ss;
 	
@@ -191,7 +191,25 @@ public class Servermain {
 		
 	}
 	
-	/* [INCOMPLETE] Logs player in.
+	public static String readInput(BufferedReader br) {
+		String input = "";
+		try {
+			while(true) {
+				input = br.readLine().trim();
+				if(!input.isEmpty()) {
+					return input;
+				}
+			}
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		}	
+	}
+	
+	
+	
+	/* [COMPLETE] Logs player in.
 	 * Checks username, hashed password in DB.
 	 * If match, write "success" to client.
 	 * If not, write "error" to client.
@@ -199,15 +217,33 @@ public class Servermain {
 	public static boolean logPlayer(BufferedReader br, PrintWriter pr) {
 		
 		try{
+			System.out.println("login ran");
 			
-			String user = br.readLine().trim();
-			String pass = br.readLine().trim();
+			String user ="";
+			String pass = "";
+			while(true) {
+				user = br.readLine().trim();
+				if(!user.isEmpty()) {
+					System.out.println(user +" received");
+					break;
+				}
+			}
+			
+			while(true) {
+				pass = br.readLine().trim();
+				if(!pass.isEmpty()) {
+					System.out.println(pass +" received");
+					break;
+				}
+			}
+			
 			
 			st = conn.prepareStatement("SELECT username,password FROM c4players WHERE username = ?");
 			st.setString(1, user);
 			ResultSet results = st.executeQuery();
 			
-			if(results.first()) {
+			if(results.next()) {
+				System.out.println("login got result");
 				String hashPass = hashPasscode(pass);
 				String resultPass = results.getString("password");
 				
@@ -220,11 +256,13 @@ public class Servermain {
 				
 		}
 		catch(Exception e) {
+			System.out.println("login exception!");
+			e.printStackTrace();
 			pr.write("error");
 			pr.flush();
 			return false;
 		}
-		
+		System.out.println("login errorrr!");
 		pr.write("error");
 		pr.flush();
 		return false;
