@@ -121,6 +121,7 @@ public class Player extends Thread {
 		playerLock.unlock();
 	}
 	
+	//quality assurance by Clientmain
 	//Lobby options: play find quit
 	/*user can give 'back' command anytime to go back to lobby*/
 		//play response: (match [opponentname]) (timeout)
