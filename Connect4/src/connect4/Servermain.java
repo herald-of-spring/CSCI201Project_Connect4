@@ -16,8 +16,6 @@ import java.security.SecureRandom;
  */
 public class Servermain {
 	
-	
-	private static int playerCount;
 	//list of all active players, pull from that list
 	private static CopyOnWriteArrayList<Player> players;
 	//list of all usernames to check for uniqueness
@@ -29,17 +27,9 @@ public class Servermain {
 	
 	private static ServerSocket ss;
 	
-	private OutputStream ostream;
-	
-	private InputStream istream;
-	
-	private static BufferedReader br;
-	
-	private static PrintWriter pr;
-	
 	private static Connection conn;
 	
-	private PreparedStatement st;
+	private static PreparedStatement st;
 	
 	//where we store boards, call player function assign & pass board to there
 	
@@ -61,18 +51,22 @@ public class Servermain {
 				/* Check if guest or registered user or login
 				 * Run either createGuest or createPlayer, pass in socket
 				 */ 
-				br = new BufferedReader(new InputStreamReader(s.getInputStream()));
-				pr = new PrintWriter(s.getOutputStream());
+				
+				BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
+				PrintWriter pr = new PrintWriter(s.getOutputStream());
 				
 				String action = br.readLine().trim();
+				
+				boolean b;
+				
 				if(action.equals("login")) {
-					
+					b = logPlayer(br,pr);
 				}
 				else if(action.equals("register")) {
-					
+					b = createPlayer(br,pr,s);
 				}
 				else if(action.equals("guest")) {
-					
+					b = createGuest(br,pr,s);
 				}
 				
 			}
@@ -86,15 +80,13 @@ public class Servermain {
 		}
 	}
 	
-	/* [INCOMPLETE] Create GUEST player object & add to database & player list
-	 * Increment player count.
-	 * If DB error, return false.
+	/* [COMPLETE] Create GUEST player object & add to database & player list.
+	 * Write "success" to client, return true.
+	 * If DB error, writer "error" to client, return false.
 	 */
-	public boolean createGuest(BufferedReader br, PrintWriter pr, Socket s) {
+	public static boolean createGuest(BufferedReader br, PrintWriter pr, Socket s) {
 		
 		try {
-			
-			
 			
 			Random rng = new Random(0);
 			String user = "Guest#" + Integer.toString(rng.nextInt(Integer.MAX_VALUE)%10000);
@@ -111,19 +103,20 @@ public class Servermain {
 				Player p = new Player(s,br,pr,user,false);
 				players.add(p);
 				users.put(user,p);
-				playerCount++;
-				pr.write("Guest created successfully!");
+				pr.write("success");
 				pr.flush();
 				return true;
 			}
 			else {
-				pr.write("Error creating guest account.");
+				pr.write("error");
 				pr.flush();
 				return false;
 			}
 			
 		}
 		catch(Exception e) {
+			pr.write("error");
+			pr.flush();
 			e.printStackTrace();
 			return false;
 		}
@@ -132,13 +125,14 @@ public class Servermain {
 	
 	/* [COMPLETE] Create player object & add to database & player list.
 	 * Increment player count.
-	 * Verify that username is unique. If not, return false.
-	 * If DB error, return false.
+	 * Verify that username is unique. If so, write "success" to client, return true.
+	 * If not, write "error" to client, return false.
 	 */
-	public boolean createPlayer(String user, String pass, Socket s) {
+	public static boolean createPlayer(BufferedReader br, PrintWriter pr, Socket s) {
 		try {
 			//check for username in DB
-			
+			String user = br.readLine().trim();
+			String pass = hashPasscode(br.readLine().trim());
 			
 			if(!users.containsKey(user) && user.length()<=50 && pass.length()<=64) { 
 				//if DB does not contain username & user/pass is valid, add to DB 
@@ -153,14 +147,13 @@ public class Servermain {
 					//TODO: p.setUser(user) //etc etc
 					players.add(p);
 					users.put(user,p);
-					playerCount++;
-					pr.write(("Registered successfully!"));
+					pr.write(("success"));
 					pr.flush();
 					return true;
 				}
 			}
 			else {
-				pr.write("Error registering new user.");
+				pr.write("error");
 				pr.flush();
 				return false;
 			}
@@ -182,12 +175,9 @@ public class Servermain {
 			
 			
 		}
-		catch(SQLException e) {
-			System.out.println("DB Error");
-			e.printStackTrace();
-			return false;
-		}
+
 		catch(Exception e) {
+			pr.write("error");
 			e.printStackTrace();
 			return false;
 		}
@@ -197,14 +187,49 @@ public class Servermain {
 	}
 	
 	/* [INCOMPLETE] Logs player in.
-	 * 
+	 * Checks username, hashed password in DB.
+	 * If match, write "success" to client.
+	 * If not, write "error" to client.
 	 */
-	public boolean logPlayer(String user, String pass) {
+	public static boolean logPlayer(BufferedReader br, PrintWriter pr) {
+		
+		try{
+			
+			String user = br.readLine().trim();
+			String pass = br.readLine().trim();
+			
+			st = conn.prepareStatement("SELECT username,password FROM c4players WHERE username = ?");
+			st.setString(1, user);
+			ResultSet results = st.executeQuery();
+			
+			if(results.first()) {
+				String hashPass = hashPasscode(pass);
+				String resultPass = results.getString("password");
+				
+				if(hashPass.equals(resultPass)) {
+					pr.write("success");
+					pr.flush();
+					return true;
+				}
+			}
+				
+		}
+		catch(Exception e) {
+			pr.write("error");
+			pr.flush();
+			return false;
+		}
+		
+		pr.write("error");
+		pr.flush();
 		return false;
 	}
 	
-	
-	public String hashPasscode(String pass) {
+	/*[COMPLETE] Hashes passed-in passcode.
+	 * Returns a string in hexadecimal.
+	 * If error, returns null.
+	 */
+	public static String hashPasscode(String pass) {
 		
 		try{
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -212,14 +237,19 @@ public class Servermain {
 			
 			StringBuilder hashPass = new StringBuilder(byteHash.length * 2);
 			for(int i=0; i<byteHash.length; i++) {
-				
+				String hexa = Integer.toHexString(0xff & byteHash[i]);
+				if(hexa.length() == 1) {
+					hashPass.append('0');
+				}
+				hashPass.append(hexa);
 			}
+			return hashPass.toString();
 		}
 		
 		catch(Exception e) {
 			e.printStackTrace();
+			return null;
 		}
-		
 		
 	}
 	
@@ -237,7 +267,7 @@ public class Servermain {
 		if(playerTwo != null && !playerTwo.isPlaying()) {
 			return playerTwo;
 		}
-
+		
 		return null;
 	}
 	
