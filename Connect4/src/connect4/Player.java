@@ -62,7 +62,7 @@ public class Player extends Thread {
 	
 	//messages Clientmain
 	private void write(String s) throws IOException {
-		output.print(s);
+		output.println(s);
 		output.flush();
 	}
 	
