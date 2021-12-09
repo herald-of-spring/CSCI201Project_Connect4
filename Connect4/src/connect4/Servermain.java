@@ -3,8 +3,12 @@ import java.sql.*;
 import java.util.Random;
 import java.util.concurrent.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.io.*;
 import java.util.Map;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 
 /* Accesses DB
@@ -29,9 +33,9 @@ public class Servermain {
 	
 	private InputStream istream;
 	
-	private BufferedReader br;
+	private static BufferedReader br;
 	
-	private PrintWriter pr;
+	private static PrintWriter pr;
 	
 	private static Connection conn;
 	
@@ -53,10 +57,24 @@ public class Servermain {
 			Socket s;
 			while(true) {
 				s = ss.accept();
-				/* Check if guest or registered user being created
+				
+				/* Check if guest or registered user or login
 				 * Run either createGuest or createPlayer, pass in socket
-				 * 
 				 */ 
+				br = new BufferedReader(new InputStreamReader(s.getInputStream()));
+				pr = new PrintWriter(s.getOutputStream());
+				
+				String action = br.readLine().trim();
+				if(action.equals("login")) {
+					
+				}
+				else if(action.equals("register")) {
+					
+				}
+				else if(action.equals("guest")) {
+					
+				}
+				
 			}
 			
 			
@@ -72,13 +90,11 @@ public class Servermain {
 	 * Increment player count.
 	 * If DB error, return false.
 	 */
-	public boolean createGuest(Socket s) {
+	public boolean createGuest(BufferedReader br, PrintWriter pr, Socket s) {
 		
 		try {
-			ostream = s.getOutputStream();
-			istream = s.getInputStream();
-			br = new BufferedReader(new InputStreamReader(istream));
-			pr = new PrintWriter(ostream);
+			
+			
 			
 			Random rng = new Random(0);
 			String user = "Guest#" + Integer.toString(rng.nextInt(Integer.MAX_VALUE)%10000);
@@ -120,13 +136,9 @@ public class Servermain {
 	 * If DB error, return false.
 	 */
 	public boolean createPlayer(String user, String pass, Socket s) {
-	
 		try {
 			//check for username in DB
-			ostream = s.getOutputStream();
-			istream = s.getInputStream();
-			br = new BufferedReader(new InputStreamReader(istream));
-			pr = new PrintWriter(ostream);
+			
 			
 			if(!users.containsKey(user) && user.length()<=50 && pass.length()<=64) { 
 				//if DB does not contain username & user/pass is valid, add to DB 
@@ -166,10 +178,7 @@ public class Servermain {
 //					return false;
 //				}
 			
-			
-			
-			
-					
+				
 			
 			
 		}
@@ -186,6 +195,35 @@ public class Servermain {
 		return false;
 		
 	}
+	
+	/* [INCOMPLETE] Logs player in.
+	 * 
+	 */
+	public boolean logPlayer(String user, String pass) {
+		return false;
+	}
+	
+	
+	public String hashPasscode(String pass) {
+		
+		try{
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			byte[] byteHash = md.digest(pass.getBytes(StandardCharsets.UTF_8));
+			
+			StringBuilder hashPass = new StringBuilder(byteHash.length * 2);
+			for(int i=0; i<byteHash.length; i++) {
+				
+			}
+		}
+		
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
+	
 	
 	/* [COMPLETE] Called by a player seeking to play game.
 	 * Search for player & check if they're available for a game.
@@ -211,18 +249,11 @@ public class Servermain {
 	 */
 	public static Player randomPlayer(String p1) {
 		
-		
 		for(Map.Entry<String,Player> entry : users.entrySet()) {
-			if((entry.getKey()).equals(p1) || !entry.getValue().isWaiting()) {
-				return null;
-			}
-			else {
+			if(!((entry.getKey()).equals(p1)) && entry.getValue().isWaiting()) {
 				return entry.getValue();
 			}
-			
 		}
-		
-		
 		
 		return null;
 	}
