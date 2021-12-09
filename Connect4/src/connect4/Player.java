@@ -11,6 +11,7 @@ public class Player extends Thread {
 	private boolean inGame;
 	private boolean inQueue;
 	private boolean inviteFlag;
+	private boolean quitFlag;
 	private Board board;
 	private Integer playerNum;
 	private Player opponent;
@@ -32,6 +33,7 @@ public class Player extends Thread {
 		this.inGame = false;
 		this.inQueue = false;
 		inviteFlag = false;
+		quitFlag = false;
 	}
 	
 	public String getUsername() {
@@ -87,6 +89,7 @@ public class Player extends Thread {
 		}
 		else if (response == "quit") {
 			shutdown();
+			quitFlag = true;
 			return false;
 		}
 		return false;
@@ -146,6 +149,9 @@ public class Player extends Thread {
 	@Override
 	public void run() {    //remember to reset inGame, inQueue, inviteFlag to false and opponent, board to null!
 		while (true) {    //or clicks quit
+			if (quitFlag == true) {    //only for quitting directly from find
+				break;
+			}
 			try {
 				if (!inviteFlag) {    //if invited skip straight to game side (inviter uses assign() to populate invitee's data members)
 					String action = input.readLine().trim();    //main lobby side
@@ -185,6 +191,10 @@ public class Player extends Thread {
 						do {
 							String user = input.readLine().trim();
 							if (user.equals("back")) {    //clicks back to main lobby
+								break;
+							}
+							else if (user.equals("quit")) {
+								quitFlag = true;
 								break;
 							}
 							opponent = Servermain.findPlayer(user);
