@@ -106,8 +106,13 @@ public class Player extends Thread {
 		do {
 			write("move");
 			col = input.readLine().trim();
-			if (col.equals("quit")) {
-				opponent.relay("quit");
+			if (col.equals("forfeit")) {
+				opponent.relay("forfeit");
+				return false;
+			}
+			else if (col.equals("quit")) {
+				opponent.relay("forfeit");
+				quitFlag = true;
 				return false;
 			}
 			valid = insert(Integer.parseInt(col));
