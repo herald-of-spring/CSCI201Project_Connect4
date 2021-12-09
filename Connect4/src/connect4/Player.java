@@ -60,8 +60,8 @@ public class Player extends Thread {
 	}
 	
 	//messages Clientmain
-	private void write(String o) throws IOException {
-		output.write(o);
+	private void write(String s) throws IOException {
+		output.print(s);
 		output.flush();
 	}
 	
@@ -122,7 +122,7 @@ public class Player extends Thread {
 	}
 	
 	//Lobby options: play find quit
-		/*user can give 'back' command anytime to go back to lobby*/
+	/*user can give 'back' command anytime to go back to lobby*/
 		//play response: (match [opponentname]) (timeout)
 			//(match [opponentname]) enters game state (see below)
 			//(timeout) returns to lobby
@@ -130,12 +130,15 @@ public class Player extends Thread {
 			//(accepted [opponentname]) enters game state
 			//all others return to lobby
 		//quit has no response, just shuts down
+		//any other input incites an (invalid) and resets to lobby
+	
 	//Game responses: (move) (win) (lose) ([number])
 	/*user can give 'quit' command anytime to forfeit*/
 		//(move) expects a column number reply
 			//relays the column number to opponent
 		//([number]) is the column the opponent chose as their move
 		//all others return to lobby
+	
 	//If player gets invited via (invite [name]) command: expects accept reply
 	/*user can give 'quit' command anytime to exit program*/
 		//any other reply is assumed denial
