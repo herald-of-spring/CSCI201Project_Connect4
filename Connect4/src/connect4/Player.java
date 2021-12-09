@@ -130,7 +130,6 @@ public class Player extends Thread {
 			//(accepted [opponentname]) enters game state
 			//all others return to lobby
 		//quit has no response, just shuts down
-		//any other input incites an (invalid) and resets to lobby
 	
 	//Game responses: (move) (win) (lose) ([number])
 	/*user can give 'quit' command anytime to forfeit*/
