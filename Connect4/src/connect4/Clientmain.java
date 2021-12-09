@@ -15,6 +15,7 @@ public class Clientmain {
 	private Socket socket = null;
 	private BufferedReader socketInput = null;
 	private PrintWriter socketOutput = null;
+	private String opponent = null;
 	
 	/* 
 	 * ClientMain constructor accepts no values. It initializes a Scanner to read user input and establishes a connection to the
@@ -62,32 +63,61 @@ public class Clientmain {
 	/*
 	 * 
 	 */
-	public String contactPlayer(String action ) {
-		socketOutput.println(action);
+	public void contactPlayer() throws IOException {
+		System.out.println("Please choose what you would like to do today:\n"
+				+ "1) \"play\" to play a random opponent\n"
+				+ "2) \"find\" to search for an opponent to play\n");
+		String input = scanner.nextLine().toLowerCase();
+		isQuit(input);
+		socketOutput.println(input);
 		String response;
 		try {
-			if (action.equals("play")) {
-				response = socketInput.readLine();
-				if (response.equals("timeout")) {
-					return "timeout";
-				}
-				else if (response.equals("match")) {
-					return socketInput.readLine(); // opponent name
-				}
+			switch(input) {
+				case "play":
+					response = socketInput.readLine();
+					switch (response) {
+						case "timeout":
+							System.out.println("Timeout error. Please try again.");
+							contactPlayer();
+							break;
+						case "match":
+							opponent = socketInput.readLine();
+							System.out.println("Match found with opponent: " + opponent);
+							break;
+					}
+					break;
+				case "find":
+					System.out.println("Please enter the username of the opponent you are searching for.");
+					input = scanner.nextLine();
+					isQuit(input);
+					opponent = input;
+					socketOutput.println(input);
+					response = socketInput.readLine();
+					switch (response) {
+						case "unregistered":
+							System.out.println("You need to be registered to search for opponents.");
+							contactPlayer();
+							break;
+						case "denied":
+							System.out.println("Play request denied.");
+							contactPlayer();
+							break;
+						case "invalid":
+							System.out.println("Invalid opponent.");
+							contactPlayer();
+							break;
+						case "accepted":
+							System.out.println("Play request accepted by your opponent: " + opponent);
+							break;
+					}
+					break;
+				default:
+					throw new IllegalArgumentException();
 			}
-			else if (action.equals("find")) {
-				response = socketInput.readLine();
-				if (response.equals("unregistered")) {
-					return "unregistered";
-				}
-			}
-			else if (action.equals("quit")) {
-				// quit
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			System.out.println("You can only choose the following inputs...");
+			contactPlayer();
 		}
-		return null;
 	}
 	
 	/*
@@ -111,13 +141,76 @@ public class Clientmain {
 			e.printStackTrace();
 		}
 	}
+	public void authorize() throws IOException {
+		System.out.println("Please choose an authorization method. You can type:\n"
+				+ "1) \"register\" to Register\n"
+				+ "2) \"login\" to Log in\n"
+				+ "3) \"guest\" to play as Guest");
+		try {
+			String input = scanner.nextLine().toLowerCase();
+			isQuit(input);
+			socketOutput.println(input);
+			switch (input) {
+				case "register":
+				case "login":
+					String response;
+					do {
+						System.out.println("Please enter your username");
+						input = scanner.nextLine();
+						isQuit(input);
+						socketOutput.println(input);
+						response = socketInput.readLine();
+						if (response.equals("error")) {
+							System.out.println("Username already in use or database error."
+									+ "\nPlease try again.");
+						}
+					} while(response.equals("error"));
+					do {
+						System.out.println("Please enter your password");
+						input = scanner.nextLine();
+						isQuit(input);
+						socketOutput.println(input);
+						response = socketInput.readLine();
+						if (response.equals("error")) {
+							System.out.println("Database error. Please try again");
+						}
+					} while(response.equals("error"));
+					break;
+				case "guest":
+					break;
+				default:
+					throw new IllegalArgumentException();
+			}
+		} catch (IllegalArgumentException e) {
+			System.out.println("Illegal argument, please choose one of the options below...");
+			authorize();
+		}
+	}
 	/*
 	 * Test main class
 	 */
+	public void isQuit(String quit) {
+		if (quit.toLowerCase().equals("quit")) {
+			socketOutput.println("quit");
+			close();
+			System.exit(0);
+		}
+	}
+	public void startGame() {
+		Board board = new Board(7,6,4);
+		
+	}
 	public static void main(String [] args) {
 		Clientmain solution = null;
 		try {
 			solution = new Clientmain();
+			System.out.println("Welcome to Connect 4 by Saleem, Matthew, Maia, Dylan, Yoon Jung and Anh!");
+			System.out.println("You can quit anytime by typing \"quit\"");
+			solution.authorize();
+			while (true) {
+				solution.contactPlayer();
+				solution.startGame();
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
