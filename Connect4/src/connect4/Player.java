@@ -83,7 +83,7 @@ public class Player extends Thread {
 		}
 		write("invite");
 		write(user);
-		String response = input.readLine().trim();
+		String response = Servermain.readInput(input);
 		if (response.equals("accept")) {
 			inviteFlag = true;
 			return true;
@@ -106,7 +106,7 @@ public class Player extends Thread {
 		Integer valid;
 		do {
 			write("move");
-			col = input.readLine().trim();
+			col = Servermain.readInput(input);
 			if (col.equals("forfeit")) {
 				opponent.relay("forfeit");
 				return false;
@@ -161,7 +161,7 @@ public class Player extends Thread {
 			}
 			try {
 				if (!inviteFlag) {    //if invited skip straight to game side (inviter uses assign() to populate invitee's data members)
-					String action = input.readLine().trim();    //main lobby side
+					String action = Servermain.readInput(input);    //main lobby side
 					if (action.equals("play")) {
 						inQueue = true;
 						for (int i=0; i<30; ++i) {    //30 second timer
@@ -196,7 +196,7 @@ public class Player extends Thread {
 							continue;
 						}
 						do {
-							String user = input.readLine().trim();
+							String user = Servermain.readInput(input);
 							if (user.equals("back")) {    //clicks back to main lobby
 								break;
 							}
