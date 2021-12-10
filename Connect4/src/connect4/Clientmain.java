@@ -95,9 +95,7 @@ public class Clientmain {
 						break;
 					default:
 						socketOutput.println(input);
-						System.out.println("default running");
 						response = readInput(socketInput);
-						System.out.println("response obtained: "+response);
 						switch (response) {
 							case "unregistered":
 								System.out.println("You need to be registered to search for opponents.");
