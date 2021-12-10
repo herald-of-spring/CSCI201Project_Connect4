@@ -229,6 +229,10 @@ public class Player extends Thread {
 				if (opponent == null) {    //cannot start game at this point, query again
 					continue;
 				}
+				try {
+					Thread.sleep(1000);    //buffer to sync both players
+				}
+				catch (InterruptedException ie) {}
 				inGame = true;    //game side
 				Integer winner = 0;
 				int turnNum = 1;
