@@ -10,7 +10,6 @@ public class Player extends Thread {
 	private boolean inGame;
 	private boolean inQueue;
 	private boolean inviteFlag;
-	private boolean quitFlag;
 	private Board board;
 	private Integer playerNum;
 	private Player opponent;
@@ -32,7 +31,6 @@ public class Player extends Thread {
 		this.inGame = false;
 		this.inQueue = false;
 		inviteFlag = false;
-		quitFlag = false;
 	}
 	
 	public String getUsername() {
@@ -66,15 +64,8 @@ public class Player extends Thread {
 		output.flush();
 	}
 	
-	//tells Clientmain to shutdown
-	private void shutdown() throws IOException {
-		input.close();
-		output.close();
-		socket.close();
-	}
-	
 	//only 1 player can invite at a time
-	private synchronized boolean invite(String user) throws IOException {
+	private synchronized boolean invite(String user) throws SocketException, IOException {
 		if (inGame) {
 			return false;
 		}
@@ -89,9 +80,7 @@ public class Player extends Thread {
 			return true;
 		}
 		else if (response.equals("quit")) {
-			shutdown();
-			quitFlag = true;
-			return false;
+			throw new SocketException("");
 		}
 		return false;
 	}
@@ -101,7 +90,7 @@ public class Player extends Thread {
 	}
 	
 	//returns false when quit/forfeit before taking turn, otherwise true
-	private boolean takeTurn() throws IOException {
+	private boolean takeTurn() throws SocketException, IOException {
 		String col;
 		Integer valid;
 		do {
@@ -114,8 +103,7 @@ public class Player extends Thread {
 			}
 			else if (col.equals("quit")) {
 				opponent.relay("forfeit");
-				quitFlag = true;
-				return false;
+				throw new SocketException("");
 			}
 			valid = insert(Integer.parseInt(col));
 		} while (valid == 0);
@@ -158,9 +146,6 @@ public class Player extends Thread {
 	@Override
 	public void run() {    //remember to reset inGame, inQueue, inviteFlag to false and opponent, board to null!
 		while (true) {    //or clicks quit
-			if (quitFlag == true) {    //only for quitting directly from find
-				break;
-			}
 			try {
 				if (!inviteFlag) {    //if invited skip straight to game side (inviter uses assign() to populate invitee's data members)
 					String action = Servermain.readInput(input);    //main lobby side
@@ -206,8 +191,7 @@ public class Player extends Thread {
 								break;
 							}
 							else if (user.equals("quit")) {
-								quitFlag = true;
-								break;
+								throw new SocketException("");
 							}
 							opponent = Servermain.findPlayer(user);
 							if (opponent == null) {
@@ -229,12 +213,10 @@ public class Player extends Thread {
 						}
 					}
 					else if (action.equals("quit")) {
-						shutdown();
-						break;
+						throw new SocketException("");
 					}
 				}
 				if (opponent == null) {    //cannot start game at this point, query again
-					
 					continue;
 				}
 				inGame = true;    //game side
@@ -277,6 +259,9 @@ public class Player extends Thread {
 				playerNum = null;
 			}
 			catch (SocketException se) {    //client drops connection
+				input.close();
+				output.close();
+				socket.close();
 				try {
 					if (inGame) {
 						opponent.write("quit");
@@ -285,7 +270,7 @@ public class Player extends Thread {
 					break;
 				}
 				catch (IOException io) {
-					continue;
+					break;
 				}
 			}
 			catch (IOException io) {    //default catchall return to lobby
