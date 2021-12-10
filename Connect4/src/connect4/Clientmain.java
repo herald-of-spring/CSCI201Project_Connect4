@@ -43,8 +43,7 @@ public class Clientmain {
 		String input = scanner.nextLine().toLowerCase().trim();
 		isQuit(input);
 		String invite;
-		/**if ((invite = socketInput.readLine()) != null) { // check if invite received
-			assert invite.equals("invite");
+		while ((invite = socketInput.readLine()) != null && invite.equals("invite")) { // check if invite received
 			opponent = readInput(socketInput);
 			System.out.println("Invite received from: " + opponent);
 			System.out.println("\"accept\" to accept or \"deny\" to deny.");
@@ -55,7 +54,7 @@ public class Clientmain {
 				return; // if opponent accepted then game can be started already
 			}
 			// if not proceed forward with the action and queue
-		}*/
+		}
 		System.out.println("FOO");
 		socketOutput.println(input);
 		String response;
@@ -267,7 +266,7 @@ public class Clientmain {
 		    isQuit(input);
 		    //System.out.println(input+" equals forfeit is "+ input.equals("forfeit"));
 		    if (input.equals("forfeit")) {
-		    	//System.out.println("FORFEIT RAN!");
+		    	System.out.println("FORFEIT RAN!");
 		    	socketOutput.println("forfeit");
 		    	return;
 		    }

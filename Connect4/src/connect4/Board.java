@@ -57,8 +57,10 @@ public class Board {
 	
 	public boolean isEmpty() {
 		for (int i=0; i<height; ++i) {
-			if (!board.get(i).isEmpty()) {
-				return false;
+			for (int j=0; j<width; ++j) {
+				if (board.get(i).get(j) != 0) {
+					return false;
+				}
 			}
 		}
 		return true;
