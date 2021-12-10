@@ -24,7 +24,7 @@ public class Servermain {
 	
 	private static String dbUrl = "jdbc:mysql://localhost:3306/connectfour";
 	private static String dbUser = "root";
-	private static String pwd = "calculatingheroine1186";
+	private static String pwd = "root";
 	
 	private static ServerSocket ss;
 	

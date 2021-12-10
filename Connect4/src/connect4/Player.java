@@ -171,7 +171,7 @@ public class Player extends Thread {
 					System.out.println(username+ "action = "+action);
 					if (action.equals("play")) {
 						inQueue = true;
-						for (int i=0; i<30; ++i) {    //30 second timer
+						for (int i=0; i<300; ++i) {    //30 second timer
 							if(opponent!=null) {
 								System.out.println(username+ " playing opponent "+opponent.getUsername());
 								break;
@@ -208,12 +208,20 @@ public class Player extends Thread {
 						inQueue = false;
 					}
 					else if (action.equals("find")) {
+						System.out.println(username+" find running");
 						if (!registered) {
 							write("unregistered");
 							continue;
 						}
 						do {
 							String user = Servermain.readInput(input);
+							if(user!=null) {
+								System.out.println("user = "+user);
+							}
+							else {
+								System.out.println("user = NULL");
+							}
+							
 							if (user.equals("back")) {    //clicks back to main lobby
 								break;
 							}
@@ -222,17 +230,23 @@ public class Player extends Thread {
 								break;
 							}
 							opponent = Servermain.findPlayer(user);
+							if(opponent!=null) {
+								System.out.println("opponent found = "+opponent.getUsername());
+							}
 							if (opponent == null) {
+								System.out.println("Found opponent invalid");
 								write("invalid");
 							}
+							
 							else if (opponent.invite(username) == false) {
+								
 								write("denied");
 								opponent = null;
 							}
 						} while (opponent == null);
 						if (opponent != null) {
 							write("accepted");
-							write(opponent.getUsername());
+							//write(opponent.getUsername());
 							board = new Board(7, 6, 4);
 							playerNum = 1;
 							opponent.assign(2, board, this);
