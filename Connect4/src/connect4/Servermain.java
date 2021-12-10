@@ -44,15 +44,11 @@ public class Servermain {
 	public static void main(String[] args) {
 		try{
 			Scanner scan = new Scanner(System.in);
-			System.out.println("Database username:");
-			dbUser = scan.nextLine().trim();
-			System.out.println("Database password:");
-			pwd = scan.nextLine().trim();
-			
+			while(!loginDatabase(scan)) {} // keep trying to log in to database until success
+			System.out.println("Successfully logged in to database.");
 			players = new CopyOnWriteArrayList<Player>();
 			users = new ConcurrentHashMap<String,Player>();
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			conn = DriverManager.getConnection(dbUrl,dbUser,pwd);
 			ss = new ServerSocket(10000);
 			Socket s;
 			while(true) {
@@ -106,6 +102,25 @@ public class Servermain {
 		}
 	}
 	
+	/*
+	 *
+	 */
+	private static boolean loginDatabase(Scanner scan) {
+		System.out.println("Database username:");
+		dbUser = scan.nextLine().trim();
+		System.out.println("Database password:");
+		pwd = scan.nextLine().trim();
+		try {
+			conn = DriverManager.getConnection(dbUrl,dbUser,pwd);
+		} catch (SQLException e) {
+			System.out.println(e.toString());
+			System.out.println("Warning: Please run the connectfour.sql script if you haven't already!");
+			System.out.println("Try again");
+			return false;
+		}
+		return true;
+	}
+	
 	/* [COMPLETE] Create GUEST player object & add to database & player list.
 	 * Write "success" to client, return true.
 	 * If DB error, writer "error" to client, return false.
@@ -148,7 +163,6 @@ public class Servermain {
 			return false;
 		}
 	}
-	
 	
 	/* [COMPLETE] Create player object & add to database & player list.
 	 * Increment player count.
