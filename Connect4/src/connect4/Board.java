@@ -55,6 +55,15 @@ public class Board {
 		
 	}
 	
+	public boolean isEmpty() {
+		for (int i=0; i<height; ++i) {
+			if (!board.get(i).isEmpty()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	/*
 	 * Checks if there is a winner on the board
 	 * If there is, return player number
