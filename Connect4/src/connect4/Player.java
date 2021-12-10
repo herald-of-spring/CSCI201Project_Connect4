@@ -93,6 +93,9 @@ public class Player extends Thread {
 	
 	//returns false when quit/forfeit before taking turn, otherwise true
 	private boolean takeTurn() throws SocketException, IOException {
+		if (endFlag) {
+			return false;
+		}
 		String col;
 		Integer valid;
 		do {
@@ -102,10 +105,12 @@ public class Player extends Thread {
 			if (col.equals("forfeit")) {
 				opponent.relay("forfeit");
 				endFlag = true;
+				opponent.endFlag = true;
 				return false;
 			}
 			else if (col.equals("quit")) {
 				opponent.relay("forfeit");
+				opponent.endFlag = true;
 				endFlag = true;
 				throw new SocketException("");
 			}
@@ -152,7 +157,6 @@ public class Player extends Thread {
 		while (true) {    //or clicks quit
 			try {
 				if (!inviteFlag) {    //if invited skip straight to game side (inviter uses assign() to populate invitee's data members)
-					write("no");    //no invites
 					String action = Servermain.readInput(input);    //main lobby side
 					if (action.equals("play")) {
 						inQueue = true;
@@ -253,7 +257,7 @@ public class Player extends Thread {
 					winner = board.checkWinner();
 					++turnNum;    //player takes turn every other iteration
 				}
-				if (endFlag == true) {
+				if (endFlag == false) {
 					if (winner == playerNum) {
 						write("win");
 					}

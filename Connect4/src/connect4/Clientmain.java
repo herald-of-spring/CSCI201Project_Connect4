@@ -42,8 +42,8 @@ public class Clientmain {
 				+ "2) \"find\" to search for an opponent to play\n");
 		String input = scanner.nextLine().toLowerCase().trim();
 		isQuit(input);
-		String invite;
-		while ((invite = socketInput.readLine()) != null && invite.equals("invite")) { // check if invite received
+		//String invite;
+		/** while ((invite = socketInput.readLine()) != null && invite.equals("invite")) { // check if invite received
 			opponent = readInput(socketInput);
 			System.out.println("Invite received from: " + opponent);
 			System.out.println("\"accept\" to accept or \"deny\" to deny.");
@@ -54,14 +54,15 @@ public class Clientmain {
 				return; // if opponent accepted then game can be started already
 			}
 			// if not proceed forward with the action and queue
-		}
-		System.out.println("FOO");
+		} **/
+		//System.out.println(invite);
 		socketOutput.println(input);
 		String response;
 		try {
 			switch(input) {
 				case "play":
 					response = readInput(socketInput);
+					System.out.println("Server response here: " + response);
 					switch (response) {
 						case "timeout":
 							System.out.println("Timeout error. Please try again.");
@@ -93,7 +94,7 @@ public class Clientmain {
 					isQuit(input);
 					switch(input) {
 					case "back":
-						break;
+						contactPlayer();
 					default:
 						socketOutput.println(input);
 						response = readInput(socketInput);
