@@ -251,11 +251,13 @@ public class Player extends Thread {
 					winner = board.checkWinner();
 					++turnNum;    //player takes turn every other iteration
 				}
-				if (winner == playerNum) {
-					write("win");
-				}
-				else {
-					write("lose");
+				if (endFlag == true) {
+					if (winner == playerNum) {
+						write("win");
+					}
+					else {
+						write("lose");
+					}
 				}
 				inGame = false;    //reset values
 				inviteFlag = false;
