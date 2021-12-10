@@ -61,17 +61,26 @@ public class Servermain {
 				
 				String action = readInput(br);
 				
-				boolean b;
+				boolean b =  false;
 				
 				
 				if(action.equals("login")) {
-					b = logPlayer(br,pr,s);
+					while(b==false) {
+						b = logPlayer(br,pr,s);
+					}
+						
 				}
 				else if(action.equals("register")) {
-					b = createPlayer(br,pr,s);
+					while(b==false) {
+						b = createPlayer(br,pr,s);
+					}
+					
 				}
 				else if(action.equals("guest")) {
-					b = createGuest(br,pr,s);
+					while(b==false) {
+						b = createGuest(br,pr,s);
+					}
+					
 				}
 				else if(action.equals("quit")) {
 					br.close();
@@ -280,10 +289,8 @@ public class Servermain {
 		System.out.println(pr.checkError());
 		System.out.println(pr.toString());
 		
-		
 		pr.println("error");
 		pr.flush();
-		System.out.println("error printed");
 		return false;
 	}
 	
