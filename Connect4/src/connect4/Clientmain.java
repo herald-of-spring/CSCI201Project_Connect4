@@ -41,6 +41,20 @@ public class Clientmain {
 				+ "2) \"find\" to search for an opponent to play\n");
 		String input = scanner.nextLine().toLowerCase().trim();
 		isQuit(input);
+		String invite;
+		if ((invite = socketInput.readLine()) != null) { // check if invite received
+			assert invite.equals("invite");
+			opponent = readInput(socketInput);
+			System.out.println("Invite received from: " + opponent);
+			System.out.println("\"accept\" to accept or \"deny\" to deny.");
+			input = scanner.nextLine().toLowerCase();
+			isQuit(input);
+			if (input.equals("accept")) {
+				socketOutput.println("accept");
+				return; // if opponent accepted then game can be started already
+			}
+			// if not proceed forward with the action and queue
+		}
 		socketOutput.println(input);
 		String response;
 		try {
