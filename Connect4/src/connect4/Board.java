@@ -34,7 +34,7 @@ public class Board {
 	 * Return 1 to signify operation was successful
 	 * */
 	public Integer add(Integer player, Integer col) {
-		
+		col--;
 		lock.lock(); 
 		try {
 			if(!(board.get(0).get(col).equals(0))) { return 0; }
@@ -192,7 +192,9 @@ public class Board {
 	 * Print function for checking functionality
 	 * */
 	public void print() {
+		System.out.println("board print ran, height = "+height+", width = "+width);
 		for(int i = 0; i < height; i++) {
+			System.out.print("[");
 			for(int j = 0; j < width; j++) {
 				Integer token = board.get(i).get(j);
 				if (token == 0) {
@@ -206,7 +208,7 @@ public class Board {
 				}
 				System.out.print(" "); 
 			}
-			System.out.println(); 
+			System.out.println("]"); 
 		}
 	}
 	

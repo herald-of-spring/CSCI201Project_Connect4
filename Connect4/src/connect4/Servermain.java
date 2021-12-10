@@ -78,6 +78,7 @@ public class Servermain {
 					pr.close();
 					s.close();
 				}
+			
 				
 			}
 			
@@ -214,7 +215,7 @@ public class Servermain {
 			while(true) {
 				//System.out.println("Eeee");
 				input = br.readLine().trim();
-				if(!input.isEmpty()) {
+				if((input!=null) && !input.isEmpty()) {
 					//System.out.println("read!");
 					return input;
 				}
@@ -256,9 +257,11 @@ public class Servermain {
 				String resultPass = results.getString("password");
 				
 				if(hashPass.equals(resultPass)) {
-					Player p = new Player(s,br,pr,user,true);
-					System.out.println(p.getUsername());
+					Thread p = new Player(s,br,pr,user,true);
+					System.out.println("SERVERMAINNN player logged in "+((Player)p).getUsername());
 					p.start();
+					users.put(user,(Player)p);
+					players.add((Player)p);
 					pr.println("success");
 					pr.flush();
 					return true;

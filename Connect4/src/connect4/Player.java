@@ -104,10 +104,14 @@ public class Player extends Thread {
 	private boolean takeTurn() throws IOException {
 		String col;
 		Integer valid;
+		System.out.println(username + " taking turn");
 		do {
 			write("move");
+			System.out.println(username+" move sent");
 			col = Servermain.readInput(input);
+			
 			if (col.equals("forfeit")) {
+				System.out.println(username+" PLAYER FORFEIT RAN!");
 				opponent.relay("forfeit");
 				return false;
 			}
@@ -118,6 +122,7 @@ public class Player extends Thread {
 			}
 			valid = insert(Integer.parseInt(col));
 		} while (valid == 0);
+		board.print();
 		write("success");
 		opponent.relay(col);
 		return true;
@@ -163,12 +168,18 @@ public class Player extends Thread {
 			try {
 				if (!inviteFlag) {    //if invited skip straight to game side (inviter uses assign() to populate invitee's data members)
 					String action = Servermain.readInput(input);    //main lobby side
-					System.out.println("Action  ="+action);
+					System.out.println(username+ "action = "+action);
 					if (action.equals("play")) {
-						System.out.println("playing-1");
 						inQueue = true;
 						for (int i=0; i<30; ++i) {    //30 second timer
-							System.out.println("playing");
+							if(opponent!=null) {
+								System.out.println(username+ " playing opponent "+opponent.getUsername());
+								break;
+							}
+							else {
+								System.out.println(username + " playing NULLopponent null");
+							}
+							
 							opponent = Servermain.randomPlayer(username);
 							if (opponent == null) {
 								try {
@@ -186,12 +197,14 @@ public class Player extends Thread {
 								board = new Board(7, 6, 4);
 								playerNum = 1;
 								opponent.assign(2, board, this);
+								//System.out.println(username+"about to break from 30 second timer opponent "+opponent.getUsername());
 								break;
 							}
 							if (i == 29) {    //last iteration
 								write("timeout");
 							}
 						}
+						System.out.println("assigning queue to be false");
 						inQueue = false;
 					}
 					else if (action.equals("find")) {
@@ -230,21 +243,29 @@ public class Player extends Thread {
 						break;
 					}
 				}
+				System.out.println(username+" broke free from 30 second timer");
 				if (opponent == null) {    //cannot start game at this point, query again
+					
 					continue;
 				}
+				System.out.println("opponent: "+opponent.getUsername());
 				inGame = true;    //game side
+				System.out.println(username+ " In game = "+inGame+" in queue = "+inQueue);
 				Integer winner = 0;
 				int turnNum = 1;
 				while (winner == 0) {    //take turns until winner found
-					if (turnNum+playerNum % 2 == 0) {    //playerNum 1 goes first always
-						if (!takeTurn()) {    //player forfeits
+					
+					if ( (turnNum+playerNum) % 2 == 0) {    //playerNum 1 goes first always
+						//System.out.println(username+"'s turn now!");
+						boolean turnTaken = takeTurn();
+						if (!turnTaken) {    //player forfeits
 							opponent.write("win");
 							break;
 						}
 					}
 					else {
 						try {
+							//System.out.println(username+" waiting for "+opponent.getUsername() + " player num = "+playerNum);
 							playerLock.lock();
 							turnCond.await();    //waits for opponent to take turn (no time limit)
 							playerLock.unlock();
@@ -254,7 +275,9 @@ public class Player extends Thread {
 							break;
 						}
 					}
+					
 					winner = board.checkWinner();
+					System.out.println(username+" is winner "+winner);
 					++turnNum;    //player takes turn every other iteration
 				}
 				if (winner == playerNum) {
@@ -263,6 +286,7 @@ public class Player extends Thread {
 				else {
 					write("lose");
 				}
+				System.out.println("values reset");
 				inGame = false;    //reset values
 				inviteFlag = false;
 				opponent = null;

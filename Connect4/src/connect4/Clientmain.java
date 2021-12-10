@@ -39,7 +39,7 @@ public class Clientmain {
 		System.out.println("Please choose what you would like to do today:\n"
 				+ "1) \"play\" to play a random opponent\n"
 				+ "2) \"find\" to search for an opponent to play\n");
-		String input = scanner.nextLine().toLowerCase();
+		String input = scanner.nextLine().toLowerCase().trim();
 		isQuit(input);
 		socketOutput.println(input);
 		String response;
@@ -139,9 +139,12 @@ public class Clientmain {
 				+ "2) \"login\" to Log in\n"
 				+ "3) \"guest\" to play as Guest");
 		try {
-			String input = scanner.nextLine().toLowerCase();
+			String input = scanner.nextLine().toLowerCase().trim();
 			isQuit(input);
-			socketOutput.println(input);
+			if(input!=null && (input.equals("register")||input.equals("login")||input.equals("guest"))) {
+				socketOutput.println(input);
+			}
+			
 			switch (input) {
 				case "register":
 				case "login":
@@ -164,6 +167,7 @@ public class Clientmain {
 //								break;
 //							}
 //						}
+
 						
 						if (response.equals("error")) {
 							System.out.println("Database error. Please try again");
@@ -171,6 +175,10 @@ public class Clientmain {
 					} while(response.equals("error"));
 					break;
 				case "guest":
+					
+					do {
+						response = Servermain.readInput(socketInput);
+					}while(response.equals("error"));
 					break;
 				default:
 					throw new IllegalArgumentException();
@@ -234,13 +242,15 @@ public class Clientmain {
 	public void queryMove() throws IOException {
 		String input = "";
 		int col = 0; // no column picked
-		while (col < 1 && col > 7) {
+		while (col < 1 || col > 7) {
 		    System.out.println("Pick your move by typing a valid column from 1 to 7.");
 		    System.out.println("To forfeit, type \"forfeit\".");
 		    input = scanner.nextLine().toLowerCase();
+		    //System.out.println("input: "+input);
 		    isQuit(input);
-		    if (input.equals("forfeit")); {
-		    	// System.out.println("Game over!");
+		    //System.out.println(input+" equals forfeit is "+ input.equals("forfeit"));
+		    if (input.equals("forfeit")) {
+		    	//System.out.println("FORFEIT RAN!");
 		    	socketOutput.println("forfeit");
 		    }
 		    try {
@@ -249,7 +259,7 @@ public class Clientmain {
 		    	System.out.println("Error: Not a game command or invalid column.");
 		        queryMove();
 		    }
-		    if (col < 1 && col > 7) {
+		    if (col < 1 || col > 7) {
 		    	System.out.println("Error: Your input must range from 1 to 7.");
 		    }
 		}
