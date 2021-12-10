@@ -1,6 +1,7 @@
 package connect4;
 import java.sql.*;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.concurrent.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
@@ -42,7 +43,12 @@ public class Servermain {
 	 */
 	public static void main(String[] args) {
 		try{
-		
+			Scanner scan = new Scanner(System.in);
+			System.out.println("Database username:");
+			dbUser = scan.nextLine().trim();
+			System.out.println("Database password:");
+			pwd = scan.nextLine().trim();
+			
 			players = new CopyOnWriteArrayList<Player>();
 			users = new ConcurrentHashMap<String,Player>();
 			Class.forName("com.mysql.cj.jdbc.Driver");
