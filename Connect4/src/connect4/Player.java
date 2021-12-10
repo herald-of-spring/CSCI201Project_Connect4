@@ -10,6 +10,7 @@ public class Player extends Thread {
 	private boolean inGame;
 	private boolean inQueue;
 	private boolean inviteFlag;
+	private boolean endFlag;
 	private Board board;
 	private Integer playerNum;
 	private Player opponent;
@@ -31,6 +32,7 @@ public class Player extends Thread {
 		this.inGame = false;
 		this.inQueue = false;
 		inviteFlag = false;
+		endFlag = false;
 	}
 	
 	public String getUsername() {
@@ -99,10 +101,12 @@ public class Player extends Thread {
 			
 			if (col.equals("forfeit")) {
 				opponent.relay("forfeit");
+				endFlag = true;
 				return false;
 			}
 			else if (col.equals("quit")) {
 				opponent.relay("forfeit");
+				endFlag = true;
 				throw new SocketException("");
 			}
 			valid = insert(Integer.parseInt(col));
@@ -223,12 +227,12 @@ public class Player extends Thread {
 				inGame = true;    //game side
 				Integer winner = 0;
 				int turnNum = 1;
-				while (winner == 0) {    //take turns until winner found
-					
-					if ( (turnNum+playerNum) % 2 == 0) {    //playerNum 1 goes first always
+				while (winner == 0 && endFlag == false) {    //take turns until winner found
+					if ((turnNum+playerNum) % 2 == 0) {    //playerNum 1 goes first always
 						boolean turnTaken = takeTurn();
 						if (!turnTaken) {    //player forfeits
 							opponent.write("win");
+							opponent.endFlag = true;
 							break;
 						}
 					}
@@ -240,10 +244,10 @@ public class Player extends Thread {
 						}
 						catch (InterruptedException ie) {    //only happens when player forfeits on opponent's turn
 							opponent.write("win");
+							opponent.endFlag = true;
 							break;
 						}
 					}
-					
 					winner = board.checkWinner();
 					++turnNum;    //player takes turn every other iteration
 				}
@@ -258,6 +262,7 @@ public class Player extends Thread {
 				opponent = null;
 				board = null;
 				playerNum = null;
+				endFlag = false;
 			}
 			catch (SocketException se) {    //client drops connection
 				try {
