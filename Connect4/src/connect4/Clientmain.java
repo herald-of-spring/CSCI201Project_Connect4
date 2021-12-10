@@ -215,7 +215,6 @@ public class Clientmain {
 	public void startGame() throws IOException {
 		Board board = new Board(7,6,4);
 		System.out.println("Game started");
-		board.print();
 		boolean over = false;
 		while (!over) {
 			over = gameLoop(board);
@@ -291,6 +290,8 @@ public class Clientmain {
 				solution.contactPlayer();
 				solution.startGame();
 			}
+		} catch (SocketException se) {
+			close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
