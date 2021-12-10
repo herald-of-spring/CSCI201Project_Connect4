@@ -46,18 +46,18 @@ public class Clientmain {
 		try {
 			switch(input) {
 				case "play":
-					response = Servermain.readInput(socketInput);
+					response = readInput(socketInput);
 					switch (response) {
 						case "timeout":
 							System.out.println("Timeout error. Please try again.");
 							contactPlayer();
 							break;
 						case "match":
-							opponent = Servermain.readInput(socketInput);
+							opponent = readInput(socketInput);
 							System.out.println("Match found with opponent: " + opponent);
 							break;
 						case "invite":
-							opponent = Servermain.readInput(socketInput);
+							opponent = readInput(socketInput);
 							System.out.println("Invite received from: " + opponent);
 							System.out.println("\"accept\" to accept or \"deny\" to deny.");
 							input = scanner.nextLine().toLowerCase();
@@ -81,7 +81,7 @@ public class Clientmain {
 						break;
 					default:
 						socketOutput.println(input);
-						response = Servermain.readInput(socketInput);
+						response = readInput(socketInput);
 						switch (response) {
 							case "unregistered":
 								System.out.println("You need to be registered to search for opponents.");
@@ -159,7 +159,7 @@ public class Clientmain {
 						isQuit(input);
 						socketOutput.println(input);
 						//System.out.println(socketInput.toString());
-						response = Servermain.readInput(socketInput);
+						response = readInput(socketInput);
 						//System.out.println(response);
 //						while(true) {
 //							response = socketInput.readLine().trim();
@@ -177,7 +177,7 @@ public class Clientmain {
 				case "guest":
 					
 					do {
-						response = Servermain.readInput(socketInput);
+						response = readInput(socketInput);
 					}while(response.equals("error"));
 					break;
 				default:
@@ -209,7 +209,7 @@ public class Clientmain {
 	}
 	public boolean gameLoop(Board b) throws IOException {
 		Board board = b;
-		String response = Servermain.readInput(socketInput);
+		String response = readInput(socketInput);
 		switch (response) {
 			case "move":
 				board.print();
@@ -284,5 +284,24 @@ public class Clientmain {
 		if (solution != null) {
 			solution.close();
 		}
+	}
+	public static String readInput(BufferedReader br) {
+		String input = "";
+		//System.out.println(br.toString());
+		try {
+			while(true) {
+				//System.out.println("Eeee");
+				input = br.readLine().trim();
+				if((input!=null) && !input.isEmpty()) {
+					//System.out.println("read!");
+					return input;
+				}
+			}
+		}
+		catch(Exception e) {
+			System.out.println("read exception");
+			e.printStackTrace();
+			return null;
+		}	
 	}
 }
