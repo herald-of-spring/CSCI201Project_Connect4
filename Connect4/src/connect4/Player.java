@@ -9,7 +9,7 @@ public class Player extends Thread {
 	private boolean registered;
 	private boolean inGame;
 	private boolean inQueue;
-	private boolean inviteFlag;
+	private String inviter;
 	private boolean endFlag;
 	private Board board;
 	private Integer playerNum;
@@ -31,7 +31,7 @@ public class Player extends Thread {
 		this.output = output;    //remember to flush!
 		this.inGame = false;
 		this.inQueue = false;
-		inviteFlag = false;
+		inviter = new String("");
 		endFlag = false;
 	}
 	
@@ -73,18 +73,10 @@ public class Player extends Thread {
 		}
 		else if (inQueue) {
 			inQueue = false;
+			return false;
 		}
-		write("invite");
-		write(user);
-		String response = Servermain.readInput(input);
-		if (response.equals("accept")) {
-			inviteFlag = true;
-			return true;
-		}
-		else if (response.equals("quit")) {
-			throw new SocketException("");
-		}
-		return false;
+		inviter = user;
+		return true;
 	}
 	
 	private Integer insert(Integer col) {
@@ -156,7 +148,7 @@ public class Player extends Thread {
 	public void run() {    //remember to reset inGame, inQueue, inviteFlag to false and opponent, board to null!
 		while (true) {    //or clicks quit
 			try {
-				if (!inviteFlag) {    //if invited skip straight to game side (inviter uses assign() to populate invitee's data members)
+				if (inviter.equals("")) {    //if invited skip straight to game side (inviter uses assign() to populate invitee's data members)
 					String action = Servermain.readInput(input);    //main lobby side
 					if (action.equals("play")) {
 						inQueue = true;
@@ -190,36 +182,42 @@ public class Player extends Thread {
 						inQueue = false;
 					}
 					else if (action.equals("find")) {
-						if (!registered) {
+						inQueue = true;
+						String user = Servermain.readInput(input);
+						if (user.equals("quit")) {
+							throw new SocketException("");
+						}
+						else if (!registered) {
 							write("unregistered");
+							inQueue = false;
 							continue;
 						}
-						do {
-							String user = Servermain.readInput(input);
-							if (user.equals("back")) {    //clicks back to main lobby
-								break;
-							}
-							else if (user.equals("quit")) {
-								throw new SocketException("");
-							}
-							opponent = Servermain.findPlayer(user);
-							if (opponent == null) {
-								write("invalid");
-							}
-							
-							else if (opponent.invite(username) == false) {
-								
-								write("denied");
+						opponent = Servermain.findPlayer(user);
+						if (opponent == null) {
+							write("invalid");
+						}
+						if (opponent.invite(username) == false) {
+							write("busy");
+							opponent = null;
+						}
+						int count = 0;
+						while (!inviter.equals(opponent.getUsername())) {    //waiting for opponent to reciprocate
+							Thread.sleep(1000);
+							if (count = 299) {
+								write("timeout");
 								opponent = null;
 							}
-						} while (opponent == null);
-						if (opponent != null) {
-							write("accepted");
-							//write(opponent.getUsername());
-							board = new Board(7, 6, 4);
-							playerNum = 1;
-							opponent.assign(2, board, this);
+							++count;
 						}
+						if (opponent != null) {
+							write("match");
+							board = new Board(7, 6, 4);
+							if (username < opponent.getUsername()) {
+								playerNum = 1;
+								opponent.assign(2, board, this);
+							}
+						}
+						inQueue = false;
 					}
 					else if (action.equals("quit")) {
 						throw new SocketException("");
