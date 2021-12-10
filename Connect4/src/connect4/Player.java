@@ -232,6 +232,7 @@ public class Player extends Thread {
 						boolean turnTaken = takeTurn();
 						if (!turnTaken) {    //player forfeits
 							opponent.write("win");
+							write("lose");
 							opponent.endFlag = true;
 							break;
 						}
@@ -244,6 +245,7 @@ public class Player extends Thread {
 						}
 						catch (InterruptedException ie) {    //only happens when player forfeits on opponent's turn
 							opponent.write("win");
+							write("lose");
 							opponent.endFlag = true;
 							break;
 						}
