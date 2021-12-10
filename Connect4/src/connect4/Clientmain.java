@@ -3,6 +3,7 @@ package connect4;
 import java.util.*;
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 
 /**
  * @author Saleem Bekkali
@@ -291,7 +292,7 @@ public class Clientmain {
 				solution.startGame();
 			}
 		} catch (SocketException se) {
-			close();
+			solution.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
