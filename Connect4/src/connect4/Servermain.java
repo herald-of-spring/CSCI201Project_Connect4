@@ -52,45 +52,50 @@ public class Servermain {
 			ss = new ServerSocket(10000);
 			Socket s;
 			while(true) {
-				s = ss.accept();
-				
-				/* Check if guest or registered user or login
-				 * Run either createGuest or createPlayer, pass in socket
-				 */ 
-				
-				BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
-				PrintWriter pr = new PrintWriter(s.getOutputStream());
-				
-				String action = readInput(br);
-				
-				boolean b =  false;
-				
-				
-				if(action.equals("login")) {
-					while(b==false) {
-						b = logPlayer(br,pr,s);
+				try {
+					s = ss.accept();
+					
+					/* Check if guest or registered user or login
+					 * Run either createGuest or createPlayer, pass in socket
+					 */ 
+					
+					BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
+					PrintWriter pr = new PrintWriter(s.getOutputStream());
+					
+					String action = readInput(br);
+					
+					boolean b =  false;
+					
+					
+					if(action.equals("login")) {
+						while(b==false) {
+							b = logPlayer(br,pr,s);
+						}
+							
 					}
+					else if(action.equals("register")) {
+						while(b==false) {
+							b = createPlayer(br,pr,s);
+						}
 						
-				}
-				else if(action.equals("register")) {
-					while(b==false) {
-						b = createPlayer(br,pr,s);
 					}
-					
-				}
-				else if(action.equals("guest")) {
-					while(b==false) {
-						b = createGuest(br,pr,s);
+					else if(action.equals("guest")) {
+						while(b==false) {
+							b = createGuest(br,pr,s);
+						}
+						
 					}
-					
+					else if(action.equals("quit")) {
+						br.close();
+						pr.close();
+						s.close();
+					}
+				} catch (SocketException e) {
+					System.out.println("Incoming client connection dropped.");
+				} catch (IOException e) {
+					e.printStackTrace();
+					System.out.println("A problem occurred with incoming client connection.");
 				}
-				else if(action.equals("quit")) {
-					br.close();
-					pr.close();
-					s.close();
-				}
-			
-				
 			}
 			
 			
@@ -125,7 +130,7 @@ public class Servermain {
 	 * Write "success" to client, return true.
 	 * If DB error, writer "error" to client, return false.
 	 */
-	public static boolean createGuest(BufferedReader br, PrintWriter pr, Socket s) {
+	public static boolean createGuest(BufferedReader br, PrintWriter pr, Socket s) throws IOException {
 		
 		try {
 			
@@ -156,7 +161,7 @@ public class Servermain {
 			}
 			
 		}
-		catch(Exception e) {
+		catch(SQLException e) {
 			pr.println("error");
 			pr.flush();
 			e.printStackTrace();
@@ -169,7 +174,7 @@ public class Servermain {
 	 * Verify that username is unique. If so, write "success" to client, return true.
 	 * If not, write "error" to client, return false.
 	 */
-	public static boolean createPlayer(BufferedReader br, PrintWriter pr, Socket s) {
+	public static boolean createPlayer(BufferedReader br, PrintWriter pr, Socket s) throws IOException {
 		try {
 			//check for username in DB
 			String user = readInput(br);
@@ -227,34 +232,27 @@ public class Servermain {
 				return false;
 			}
 		}
-		catch(Exception e) {
+		/**catch(Exception e) {
 			pr.println("error");
 			e.printStackTrace();
 			return false;
-		}
+		}**/
 		
 		return false;
 		
 	}
 	
-	public static String readInput(BufferedReader br) {
+	public static String readInput(BufferedReader br) throws IOException {
 		String input = "";
 		//System.out.println(br.toString());
-		try {
-			while(true) {
-				//System.out.println("Eeee");
-				input = br.readLine().trim();
-				if((input!=null) && !input.isEmpty()) {
-					//System.out.println("read!");
-					return input;
-				}
+		while(true) {
+			//System.out.println("Eeee");
+			input = br.readLine().trim();
+			if((input!=null) && !input.isEmpty()) {
+				//System.out.println("read!");
+				return input;
 			}
 		}
-		catch(Exception e) {
-			System.out.println("read exception");
-			e.printStackTrace();
-			return null;
-		}	
 	}
 	
 	
@@ -264,7 +262,7 @@ public class Servermain {
 	 * If match, write "success" to client.
 	 * If not, write "error" to client.
 	 */
-	public static boolean logPlayer(BufferedReader br, PrintWriter pr, Socket s) {
+	public static boolean logPlayer(BufferedReader br, PrintWriter pr, Socket s) throws IOException {
 		
 		try{
 			String user ="";
@@ -294,7 +292,7 @@ public class Servermain {
 			}
 				
 		}
-		catch(Exception e) {
+		catch(SQLException e) {
 			System.out.println("login exception!");
 			e.printStackTrace();
 			pr.println("error");
@@ -328,7 +326,7 @@ public class Servermain {
 			return hashPass.toString();
 		}
 		
-		catch(Exception e) {
+		catch(NoSuchAlgorithmException e) {
 			e.printStackTrace();
 			return null;
 		}

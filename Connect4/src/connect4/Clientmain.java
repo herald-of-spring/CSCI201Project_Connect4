@@ -292,7 +292,7 @@ public class Clientmain {
 				solution.startGame();
 			}
 		} catch (SocketException se) {
-			solution.close();
+			System.out.println("Server dropped connection.");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -301,23 +301,16 @@ public class Clientmain {
 			solution.close();
 		}
 	}
-	public static String readInput(BufferedReader br) {
+	public static String readInput(BufferedReader br) throws IOException {
 		String input = "";
 		//System.out.println(br.toString());
-		try {
-			while(true) {
-				//System.out.println("Eeee");
-				input = br.readLine().trim();
-				if((input!=null) && !input.isEmpty()) {
-					//System.out.println("read!");
-					return input;
-				}
+		while(true) {
+			System.out.println("Eeee");
+			input = br.readLine().trim();
+			if((input!=null) && !input.isEmpty()) {
+				//System.out.println("read!");
+				return input;
 			}
 		}
-		catch(Exception e) {
-			System.out.println("read exception");
-			e.printStackTrace();
-			return null;
-		}	
 	}
 }

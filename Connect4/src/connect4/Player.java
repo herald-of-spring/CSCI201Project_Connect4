@@ -281,7 +281,7 @@ public class Player extends Thread {
 					if (inGame) {
 						opponent.write("quit");
 					}
-					shutdown();
+					System.out.println("Client " + username + " dropped connection.");
 					break;
 				}
 				catch (IOException io) {
