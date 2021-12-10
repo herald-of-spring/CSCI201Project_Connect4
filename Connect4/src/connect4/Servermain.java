@@ -247,8 +247,6 @@ public class Servermain {
 	public static boolean logPlayer(BufferedReader br, PrintWriter pr, Socket s) {
 		
 		try{
-			System.out.println("login ran");
-			
 			String user ="";
 			String pass = "";
 			user = readInput(br);
@@ -261,13 +259,11 @@ public class Servermain {
 			ResultSet results = st.executeQuery();
 			
 			if(results.next()) {
-				System.out.println("login got result");
 				String hashPass = hashPasscode(pass);
 				String resultPass = results.getString("password");
 				
 				if(hashPass.equals(resultPass)) {
 					Thread p = new Player(s,br,pr,user,true);
-					System.out.println("SERVERMAINNN player logged in "+((Player)p).getUsername());
 					p.start();
 					users.put(user,(Player)p);
 					players.add((Player)p);
@@ -285,9 +281,6 @@ public class Servermain {
 			pr.flush();
 			return false;
 		}
-		System.out.println("login errorrr!");
-		System.out.println(pr.checkError());
-		System.out.println(pr.toString());
 		
 		pr.println("error");
 		pr.flush();
