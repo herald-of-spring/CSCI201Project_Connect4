@@ -43,7 +43,7 @@ public class Clientmain {
 		String input = scanner.nextLine().toLowerCase().trim();
 		isQuit(input);
 		String invite;
-		if ((invite = socketInput.readLine()) != null) { // check if invite received
+		/**if ((invite = socketInput.readLine()) != null) { // check if invite received
 			assert invite.equals("invite");
 			opponent = readInput(socketInput);
 			System.out.println("Invite received from: " + opponent);
@@ -55,7 +55,8 @@ public class Clientmain {
 				return; // if opponent accepted then game can be started already
 			}
 			// if not proceed forward with the action and queue
-		}
+		}*/
+		System.out.println("FOO");
 		socketOutput.println(input);
 		String response;
 		try {
@@ -217,6 +218,7 @@ public class Clientmain {
 		Board board = new Board(7,6,4);
 		System.out.println("Game started");
 		boolean over = false;
+		board.print(); // Initial print of the board
 		while (!over) {
 			over = gameLoop(board);
 		}
@@ -226,7 +228,9 @@ public class Clientmain {
 		String response = readInput(socketInput);
 		switch (response) {
 			case "move":
-				board.print();
+				if (!board.isEmpty()) {
+					board.print();
+				}
 				queryMove();
 				return false;
 			case "success": // you made a valid move
@@ -249,7 +253,6 @@ public class Clientmain {
 				int col = Integer.parseInt(response);
 				System.out.println("Your opponent picked column " + col);
 				board.add(2, col);
-				board.print();
 				return false;
 		}
 	}
@@ -266,6 +269,7 @@ public class Clientmain {
 		    if (input.equals("forfeit")) {
 		    	//System.out.println("FORFEIT RAN!");
 		    	socketOutput.println("forfeit");
+		    	return;
 		    }
 		    try {
 		        col = Integer.parseInt(input);
