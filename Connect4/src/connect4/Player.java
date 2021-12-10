@@ -10,7 +10,6 @@ public class Player extends Thread {
 	private boolean inGame;
 	private boolean inQueue;
 	private boolean inviteFlag;
-	private boolean quitFlag;
 	private Board board;
 	private Integer playerNum;
 	private Player opponent;
@@ -32,7 +31,6 @@ public class Player extends Thread {
 		this.inGame = false;
 		this.inQueue = false;
 		inviteFlag = false;
-		quitFlag = false;
 	}
 	
 	public String getUsername() {
