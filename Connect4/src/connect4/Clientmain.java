@@ -62,7 +62,7 @@ public class Clientmain {
 				case "play":
 					socketOutput.println(input);
 					response = readInput(socketInput);
-					System.out.println("Server response here: " + response);
+					// System.out.println("Server response here: " + response);
 					switch (response) {
 						case "timeout":
 							System.out.println("Timeout error. Please try again.");
@@ -72,7 +72,7 @@ public class Clientmain {
 							opponent = readInput(socketInput);
 							System.out.println("Match found with opponent: " + opponent);
 							break;
-						case "invite":
+						/*case "invite":
 							opponent = readInput(socketInput);
 							System.out.println("Invite received from: " + opponent);
 							System.out.println("\"accept\" to accept or \"deny\" to deny.");
@@ -84,7 +84,7 @@ public class Clientmain {
 							else {
 								contactPlayer(); // any other response means denial and goes back to lobby
 							}
-							break;
+							break;*/
 					}
 					break;
 				case "find":
@@ -231,6 +231,7 @@ public class Clientmain {
 	public boolean gameLoop(Board b) throws IOException {
 		Board board = b;
 		String response = readInput(socketInput);
+		// System.out.println("Response is : " + response);
 		switch (response) {
 			case "move":
 				if (!board.isEmpty()) {
@@ -246,6 +247,7 @@ public class Clientmain {
 			case "forfeit":
 				System.out.println("Your opponent forfeited the game");
 				return false;
+			case "quit":
 			case "win":
 				System.out.println("You won!");
 				board.print();
@@ -272,7 +274,6 @@ public class Clientmain {
 		    isQuit(input);
 		    //System.out.println(input+" equals forfeit is "+ input.equals("forfeit"));
 		    if (input.equals("forfeit")) {
-		    	System.out.println("FORFEIT RAN!");
 		    	socketOutput.println("forfeit");
 		    	return;
 		    }
@@ -314,7 +315,6 @@ public class Clientmain {
 		String input = "";
 		//System.out.println(br.toString());
 		while(true) {
-			System.out.println("Eeee");
 			input = br.readLine().trim();
 			if((input!=null) && !input.isEmpty()) {
 				//System.out.println("read!");

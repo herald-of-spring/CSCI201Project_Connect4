@@ -108,7 +108,7 @@ public class Player extends Thread {
 			}
 			valid = insert(Integer.parseInt(col));
 		} while (valid == 0);
-		board.print();
+		// board.print();
 		write("success");
 		opponent.relay(col);
 		return true;
