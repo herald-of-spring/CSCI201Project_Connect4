@@ -37,7 +37,7 @@ public class Clientmain {
 	 */
 	public void contactPlayer() throws IOException {
 		System.out.println("Please choose what you would like to do today:\n"
-				+ "1) \"play\" to play a random opponent\n"
+				+ "1) \"play\" to play a random opponent or check for invites\n"
 				+ "2) \"find\" to search for an opponent to play\n");
 		String input = scanner.nextLine().toLowerCase().trim();
 		isQuit(input);
@@ -95,7 +95,9 @@ public class Clientmain {
 						break;
 					default:
 						socketOutput.println(input);
+						System.out.println("default running");
 						response = readInput(socketInput);
+						System.out.println("response obtained: "+response);
 						switch (response) {
 							case "unregistered":
 								System.out.println("You need to be registered to search for opponents.");

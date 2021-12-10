@@ -192,7 +192,6 @@ public class Board {
 	 * Print function for checking functionality
 	 * */
 	public void print() {
-		System.out.println("board print ran, height = "+height+", width = "+width);
 		for(int i = 0; i < height; i++) {
 			System.out.print("[");
 			for(int j = 0; j < width; j++) {
