@@ -148,6 +148,7 @@ public class Player extends Thread {
 		while (true) {    //or clicks quit
 			try {
 				if (!inviteFlag) {    //if invited skip straight to game side (inviter uses assign() to populate invitee's data members)
+					write("no");    //no invites
 					String action = Servermain.readInput(input);    //main lobby side
 					if (action.equals("play")) {
 						inQueue = true;
@@ -174,7 +175,7 @@ public class Player extends Thread {
 								opponent.assign(2, board, this);
 								break;
 							}
-							if (i == 29) {    //last iteration
+							if (i == 299) {    //last iteration
 								write("timeout");
 							}
 						}
@@ -259,10 +260,10 @@ public class Player extends Thread {
 				playerNum = null;
 			}
 			catch (SocketException se) {    //client drops connection
-				input.close();
-				output.close();
-				socket.close();
 				try {
+					input.close();
+					output.close();
+					socket.close();
 					if (inGame) {
 						opponent.write("quit");
 					}
