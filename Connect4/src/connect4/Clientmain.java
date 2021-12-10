@@ -56,11 +56,11 @@ public class Clientmain {
 			// if not proceed forward with the action and queue
 		} **/
 		//System.out.println(invite);
-		socketOutput.println(input);
 		String response;
 		try {
 			switch(input) {
 				case "play":
+					socketOutput.println(input);
 					response = readInput(socketInput);
 					System.out.println("Server response here: " + response);
 					switch (response) {
@@ -90,29 +90,34 @@ public class Clientmain {
 				case "find":
 					System.out.println("Please enter the username of the opponent you are searching for.");
 					System.out.println("Otherwise, you can do \"back\" to go back to the lobby.");
-					input = scanner.nextLine();
-					isQuit(input);
-					switch(input) {
+					String input2 = scanner.nextLine();
+					isQuit(input2);
+					switch(input2) {
 					case "back":
 						contactPlayer();
 					default:
-						socketOutput.println(input);
+						socketOutput.println(input); // send "find"
+						socketOutput.println(input2); // send opponent username
 						response = readInput(socketInput);
 						switch (response) {
 							case "unregistered":
 								System.out.println("You need to be registered to search for opponents.");
 								contactPlayer();
 								break;
-							case "denied":
-								System.out.println("Play request denied.");
-								contactPlayer();
-								break;
 							case "invalid":
 								System.out.println("Invalid opponent.");
 								contactPlayer();
 								break;
-							case "accepted":
-								opponent = input;
+							case "busy":
+								System.out.println("Opponent is busy.");
+								contactPlayer();
+								break;
+							case "timeout":
+								System.out.println("Your opponent did not \"find\" you back.");
+								contactPlayer();
+								break;
+							case "match":
+								opponent = input2;
 								System.out.println("Play request accepted by your opponent: " + opponent);
 								break;
 						}

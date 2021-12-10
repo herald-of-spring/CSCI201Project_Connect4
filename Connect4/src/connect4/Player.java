@@ -182,28 +182,32 @@ public class Player extends Thread {
 						inQueue = false;
 					}
 					else if (action.equals("find")) {
-						inQueue = true;
 						String user = Servermain.readInput(input);
 						if (user.equals("quit")) {
 							throw new SocketException("");
 						}
 						else if (!registered) {
 							write("unregistered");
-							inQueue = false;
 							continue;
 						}
 						opponent = Servermain.findPlayer(user);
 						if (opponent == null) {
 							write("invalid");
+							continue;
 						}
-						if (opponent.invite(username) == false) {
+						else if (opponent.invite(username) == false) {
 							write("busy");
 							opponent = null;
+							continue;
 						}
 						int count = 0;
 						while (!inviter.equals(opponent.getUsername())) {    //waiting for opponent to reciprocate
-							Thread.sleep(1000);
-							if (count = 299) {
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								continue;
+							}
+							if (count == 299) {
 								write("timeout");
 								opponent = null;
 							}
@@ -212,12 +216,11 @@ public class Player extends Thread {
 						if (opponent != null) {
 							write("match");
 							board = new Board(7, 6, 4);
-							if (username < opponent.getUsername()) {
+							if (username.compareTo(opponent.getUsername()) > 0) {
 								playerNum = 1;
 								opponent.assign(2, board, this);
 							}
 						}
-						inQueue = false;
 					}
 					else if (action.equals("quit")) {
 						throw new SocketException("");
@@ -264,7 +267,7 @@ public class Player extends Thread {
 					}
 				}
 				inGame = false;    //reset values
-				inviteFlag = false;
+				inviter = "";
 				opponent = null;
 				board = null;
 				playerNum = null;
